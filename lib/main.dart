@@ -1,5 +1,5 @@
 // Day 3 project — Restaurant Menu App
-// Run: flutter run
+// Run: flutter run -t lib/main.dart
 import 'package:flutter/material.dart';
 
 import 'restaurant/screens/menu_screen.dart';
