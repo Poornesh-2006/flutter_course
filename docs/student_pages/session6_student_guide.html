@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Session 6 · APIs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: same reading column and Debug Paint styling as Session 3, plus a request-to-model flow and the four screen states */
+:root {
+  --ground: #f5f8fa;
+  --paper: #ffffff;
+  --ink: #14212b;
+  --muted: #566672;
+  --line: #d3dde4;
+  --accent: #0a6fb8;
+  --accent-soft: #e2f0fa;
+  --paint: #11a3a3;          /* Debug Paint cyan for outlines */
+  --warn: #b5450b;
+  --warn-soft: #fbeee6;
+  --ok: #1f7a3d;
+  --code-bg: #eef3f6;
+  --box1: #e86a4a; --box2: #2f9e5f; --box3: #3478c6;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --s-1: 0.8125rem; --s0: 1rem; --s1: 1.25rem; --s2: 1.6rem; --s3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+    --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+    --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+    --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+  --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+  --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+  --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: var(--s0); line-height: 1.65;
+  padding-inline: 20px; padding-block: 0 72px;
+}
+.wrap { max-width: 760px; margin-inline: auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: var(--s2); font-weight: 800; }
+h3 { font-size: var(--s1); font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre {
+  margin: 0; font-family: var(--mono); font-size: var(--s-1); line-height: 1.6;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; color: var(--ink);
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+.k { color: var(--accent); font-weight: 600; }
+.c { color: var(--muted); }
+.label {
+  font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--paint); font-weight: 600;
+}
+section { display: grid; gap: 18px; }
+
+/* Header */
+header { padding-block: 48px 0; display: grid; gap: 16px; }
+header h1 { font-size: clamp(2.2rem, 7vw, var(--s3)); font-weight: 800; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.goal {
+  border: 1.5px dashed var(--paint); border-radius: 10px; padding: 16px 18px;
+  background: var(--paper); display: grid; gap: 6px;
+}
+
+/* Concept blocks */
+.concept { border-top: 1px solid var(--line); padding-top: 28px; display: grid; gap: 14px; }
+.concept-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.demo-num {
+  font-family: var(--mono); font-size: var(--s-1); color: var(--paint);
+  border: 1.5px dashed var(--paint); border-radius: 6px; padding: 0 7px;
+}
+.run { font-family: var(--mono); font-size: var(--s-1); color: var(--muted); }
+.run b { color: var(--ink); font-weight: 600; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 65ch; }
+
+/* Mini layouts drawn like Debug Paint */
+.stage {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: grid; gap: 12px;
+}
+.stage-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.stage-row .cap { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.track {
+  outline: 1.5px dashed var(--paint); outline-offset: -1px; min-height: 56px;
+  display: flex; align-items: center; padding: 4px;
+}
+.b { width: 30px; flex: none; border-radius: 3px; }
+.b1 { background: var(--box1); height: 22px; }
+.b2 { background: var(--box2); height: 40px; }
+.b3 { background: var(--box3); height: 30px; }
+.box-label { color: #fff; font-family: var(--mono); font-size: 0.7rem; display: grid; place-items: center; height: 40px; border-radius: 3px; }
+
+.boxmodel { display: flex; gap: 16px; flex-wrap: wrap; }
+.bm { flex: 1 1 200px; display: grid; gap: 6px; }
+.bm-outer { outline: 1.5px dashed var(--muted); padding: 18px; position: relative; }
+.bm-box { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.bm-pad { padding: 18px; }
+.bm-child { background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 0.72rem; padding: 4px 8px; }
+
+.stack-demo { position: relative; height: 130px; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(135deg, var(--box1), var(--box3)); }
+.stack-demo .badge { position: absolute; top: 10px; left: 10px; background: var(--paper); color: var(--ink);
+  font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+.stack-demo .heart { position: absolute; bottom: 10px; right: 12px; color: #fff; font-size: 1.3rem; }
+.stack-demo .pos { position: absolute; font-family: var(--mono); font-size: 0.68rem; color: #fff; opacity: .85; }
+
+.grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid-demo div { height: 44px; border-radius: 6px; outline: 1.5px dashed var(--paint); outline-offset: -1px;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+.list-demo { display: grid; gap: 0; outline: 1.5px dashed var(--paint); outline-offset: -1px; max-height: 150px; overflow: hidden; position: relative; }
+.list-demo div { padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: var(--s-1); display: flex; justify-content: space-between; }
+.list-demo div span { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; }
+.list-demo::after { content: "rows 10 – 999 not built yet"; position: absolute; inset: auto 0 0 0; padding: 6px 12px;
+  background: linear-gradient(transparent, var(--paper) 55%); font-family: var(--mono); font-size: 0.7rem; color: var(--paint); text-align: right; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td code { white-space: nowrap; }
+
+/* File tree */
+.tree { font-family: var(--mono); font-size: var(--s-1); line-height: 1.8; }
+.tree .note { color: var(--muted); }
+.tree .hl { color: var(--accent); font-weight: 600; }
+
+/* Errors */
+.err { display: grid; gap: 10px; }
+.err-item { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; display: grid; gap: 4px; }
+.err-item b { font-family: var(--mono); font-size: var(--s-1); color: var(--warn); font-weight: 600; }
+
+/* Checklist */
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; }
+.checks input { margin-top: 5px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.checks label { cursor: pointer; }
+
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+details summary { cursor: pointer; font-weight: 500; }
+details p { margin-top: 8px; color: var(--muted); }
+.qa { display: grid; gap: 8px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .stage-row { grid-template-columns: 1fr; gap: 4px; }
+}
+/* Session 6 additions */
+.note-box { border: 1.5px dashed var(--paint); border-radius: 10px; padding: 12px 16px; background: var(--paper); display: grid; gap: 6px; }
+.trip { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.trip .step { flex: 1 1 130px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; align-content: start; }
+.trip .step b { font-family: var(--mono); font-size: 0.78rem; color: var(--accent); }
+.trip .step span { font-size: 0.85rem; color: var(--muted); }
+.trip .step code { font-size: 0.78em; }
+.trip .arrow { align-self: center; color: var(--paint); font-family: var(--mono); }
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.st { background: var(--paper); border: 1.5px dashed var(--paint); border-radius: 12px; padding: 14px; display: grid; gap: 6px; justify-items: center; text-align: center; align-content: start; }
+.st .ico { font-size: 1.6rem; line-height: 1; }
+.st b { font-family: var(--mono); font-size: 0.8rem; color: var(--paint); }
+.st span { font-size: 0.85rem; color: var(--muted); }
+.spin { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); }
+.json-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+
+/* Show => and != as typed, not as joined symbols */
+code, pre { font-variant-ligatures: none; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="label">Flutter course · Session 6 of 15</span>
+  <h1>Working <span>with</span> APIs</h1>
+  <p class="lede">Until now, every piece of data in our apps was typed into the code. Today the data comes from the internet: you'll ask a server for it, turn the answer into Dart objects, and show the right screen while you wait, when it fails, and when there's nothing to show.</p>
+  <div class="goal">
+    <span class="label">By the end of today you can</span>
+    <p>Fetch data from a web API with <code>http</code>, turn the JSON into typed model classes with <code>fromJson</code>, and show loading, error, empty and data states, including no internet and timeouts.</p>
+  </div>
+</header>
+
+<section>
+  <h2>Setup</h2>
+  <pre><code>flutter pub add http</code></pre>
+  <p>In VS Code, today's apps are in the <b>Session 6</b> group of the Run and Debug dropdown. Before you write any code, open these addresses in your browser and look at the data:</p>
+  <ul class="points">
+    <li><code>https://jsonplaceholder.typicode.com/users</code>: 10 sample users (demos)</li>
+    <li><code>https://official-joke-api.appspot.com/random_joke</code>: a random joke (project). Refresh the page and you get a new one.</li>
+  </ul>
+  <div class="note-box">
+    <span class="label">Riverpod 3 note</span>
+    <p>When a provider fails, Riverpod 3 quietly retries it for about 30 seconds while showing the spinner. Our apps turn that off so the error message appears straight away: <code>ProviderScope(retry: (retryCount, error) =&gt; null, child: ...)</code>.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The big picture: the waiter</h2>
+  <p>An <b>API</b> is like a waiter. Your app doesn't walk into the kitchen (the server's database). It gives the waiter an order (a <b>request</b> to an address). The waiter comes back with a short answer (“here you go”, “we don't have that”, “the kitchen is on fire”) and a plate of data. The plate arrives wrapped as one long piece of text, so we unwrap it and put each item into a proper Dart box.</p>
+  <div class="trip">
+    <div class="step"><b>1 · request</b><span>Your app asks an address</span><code>http.get(url)</code></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>2 · wait</b><span>Takes time. Show a spinner</span><code>await</code></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>3 · response</b><span>A status code and a body (text)</span><code>200</code> · <code>"{…}"</code></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>4 · decode</b><span>Text → Dart Map or List</span><code>jsonDecode</code></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>5 · model</b><span>Map → typed object</span><code>User.fromJson</code></div>
+  </div>
+</section>
+
+<section>
+  <h2>API words, in plain English</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Word</th><th>What it means</th></tr>
+    <tr><td><b>API</b></td><td>A web address that returns data instead of a web page.</td></tr>
+    <tr><td><b>Endpoint / URL</b></td><td>The exact address you ask, e.g. <code>…/users/1</code>. Different addresses give different data.</td></tr>
+    <tr><td><b>Request</b></td><td>Your app's question. <b>GET</b> reads data, <b>POST</b> creates, <b>PUT/PATCH</b> updates, <b>DELETE</b> removes. Today we only use GET.</td></tr>
+    <tr><td><b>Status code</b></td><td>A 3-digit answer to “did it work?”. 200 means yes.</td></tr>
+    <tr><td><b>Body</b></td><td>The data in the response, always one long String.</td></tr>
+    <tr><td><b>JSON</b></td><td>The text format of the data. <code>{ }</code> is one object (becomes a <code>Map</code>), <code>[ ]</code> is a list (becomes a <code>List</code>).</td></tr>
+    <tr><td><code>jsonDecode</code></td><td>Turns the JSON text into Dart Maps and Lists. Comes from <code>dart:convert</code>.</td></tr>
+    <tr><td><b>Model class</b></td><td>A Dart class for one item, e.g. <code>User</code> with <code>name</code> and <code>email</code>.</td></tr>
+    <tr><td><code>fromJson</code></td><td>A constructor that builds one model object from one Map. Lets you write <code>user.name</code> instead of <code>json['name']</code>.</td></tr>
+    <tr><td><code>Future</code>, <code>async</code>, <code>await</code></td><td>From Session 1: a value that arrives later. <code>await</code> waits for it without freezing the app.</td></tr>
+    <tr><td><code>.timeout(…)</code></td><td>Give up after a set time instead of spinning forever.</td></tr>
+    <tr><td><code>FutureBuilder</code></td><td>A widget that shows one thing while a Future is waiting and another when it's done.</td></tr>
+    <tr><td><code>FutureProvider</code></td><td>The Riverpod way: a provider that runs an async function and remembers the result.</td></tr>
+    <tr><td><code>AsyncValue</code></td><td>What a FutureProvider gives you: <b>loading</b>, <b>error</b> or <b>data</b>, never more than one at a time.</td></tr>
+    <tr><td><code>.when(…)</code></td><td>Asks you for one widget per state: loading, error, data.</td></tr>
+    <tr><td><code>ref.invalidate(p)</code></td><td>Throw away the old result and fetch again. That's how Retry and “Next joke” work.</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Status codes you need to know</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Code</th><th>Means</th><th>What your app should do</th></tr>
+    <tr><td class="num" style="font-family:var(--mono)">200</td><td>OK, here's the data</td><td>Decode and show it</td></tr>
+    <tr><td class="num" style="font-family:var(--mono)">201</td><td>Created (after a POST)</td><td>Show success</td></tr>
+    <tr><td class="num" style="font-family:var(--mono)">400</td><td>Bad request: you sent something wrong</td><td>Fix the request</td></tr>
+    <tr><td class="num" style="font-family:var(--mono)">401</td><td>Not logged in</td><td>Send the user to login</td></tr>
+    <tr><td class="num" style="font-family:var(--mono)">404</td><td>Not found</td><td>Show “not found”</td></tr>
+    <tr><td class="num" style="font-family:var(--mono)">500</td><td>The server broke</td><td>Show an error with Retry</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>The concepts, in the order we cover them</h2>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo1</span><h3>http.get, status codes and jsonDecode</h3></div>
+    <p>Two buttons: one asks for user 1 (status <b>200</b>), the other for user 9999, who doesn't exist (status <b>404</b>). The screen shows the raw body first, then the same data after <code>jsonDecode</code>.</p>
+    <pre><code><span class="k">import</span> <span class="k">'dart:convert'</span>;
+<span class="k">import</span> <span class="k">'package:http/http.dart'</span> <span class="k">as</span> http;
+
+<span class="k">final</span> response = <span class="k">await</span> http.get(Uri.parse(<span class="k">'https://jsonplaceholder.typicode.com/users/1'</span>));
+response.statusCode   <span class="c">// 200</span>
+response.body         <span class="c">// '{"id":1,"name":"Leanne Graham",...}'  ← one long String</span>
+
+<span class="k">final</span> Map&lt;String, dynamic&gt; json = jsonDecode(response.body);
+json[<span class="k">'name'</span>]                 <span class="c">// 'Leanne Graham'</span>
+json[<span class="k">'address'</span>][<span class="k">'city'</span>]      <span class="c">// nested: one Map inside another</span></code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">model</span><h3>Model class with fromJson</h3></div>
+    <p>Reading <code>json['name']</code> everywhere is risky: one typo and the app crashes at runtime. A model class reads the JSON <b>once</b>, in one place.</p>
+    <div class="json-pair">
+      <pre><code><span class="c">// what the API sends (one user)</span>
+{
+  <span class="k">"id"</span>: 1,
+  <span class="k">"name"</span>: <span class="k">"Leanne Graham"</span>,
+  <span class="k">"email"</span>: <span class="k">"Sincere@april.biz"</span>,
+  <span class="k">"company"</span>: {
+    <span class="k">"name"</span>: <span class="k">"Romaguera-Crona"</span>
+  }
+}</code></pre>
+      <pre><code><span class="k">class</span> User {
+  ...
+  <span class="k">factory</span> User.fromJson(
+      Map&lt;String, dynamic&gt; json) {
+    <span class="k">return</span> User(
+      id: json[<span class="k">'id'</span>] <span class="k">as</span> int,
+      name: json[<span class="k">'name'</span>] <span class="k">as</span> String,
+      email: json[<span class="k">'email'</span>] <span class="k">as</span> String,
+      company: json[<span class="k">'company'</span>][<span class="k">'name'</span>]
+          <span class="k">as</span> String,
+    );
+  }
+}</code></pre>
+    </div>
+    <p>The API sends a <b>list</b> of users, so decode it as a List and turn each Map into a User:</p>
+    <pre><code><span class="k">final</span> List&lt;dynamic&gt; data = jsonDecode(response.body);
+<span class="k">return</span> data.map((item) =&gt; User.fromJson(item)).toList();</code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">errors</span><h3>Turning every failure into a sentence</h3></div>
+    <p>Four things can go wrong. Catch each one and throw a message a user understands. This is in <code>users_api.dart</code>:</p>
+    <pre><code><span class="k">try</span> {
+  <span class="k">final</span> response = <span class="k">await</span> http.get(url).timeout(<span class="k">const</span> Duration(seconds: 10));
+  <span class="k">if</span> (response.statusCode != 200) {
+    <span class="k">throw</span> ApiException(<span class="k">'The server answered ${response.statusCode}. Please try again.'</span>);
+  }
+  ...
+} <span class="k">on</span> TimeoutException {          <span class="c">// took longer than 10 seconds</span>
+  <span class="k">throw</span> ApiException(<span class="k">'The server took too long to answer...'</span>);
+} <span class="k">on</span> http.ClientException {      <span class="c">// no Wi-Fi / no data / server unreachable</span>
+  <span class="k">throw</span> ApiException(<span class="k">'No internet connection...'</span>);
+} <span class="k">on</span> FormatException {           <span class="c">// the body wasn't valid JSON</span>
+  <span class="k">throw</span> ApiException(<span class="k">'The server sent data we could not read.'</span>);
+}</code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">states</span><h3>The four states every loading screen needs</h3></div>
+    <div class="states">
+      <div class="st"><span class="spin" aria-hidden="true"></span><b>loading</b><span>Waiting for the server. Show a spinner.</span></div>
+      <div class="st"><span class="ico" aria-hidden="true">⚠</span><b>error</b><span>Say what went wrong in plain words, and offer Retry.</span></div>
+      <div class="st"><span class="ico" aria-hidden="true">∅</span><b>empty</b><span>It worked, but there's nothing. Say so kindly.</span></div>
+      <div class="st"><span class="ico" aria-hidden="true">≡</span><b>data</b><span>Show the list.</span></div>
+    </div>
+    <p>Demos 2 and 3 have <b>Break</b> and <b>Empty</b> switches in the AppBar, so you can see the error and empty states without switching off the Wi-Fi.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo2</span><h3>FutureBuilder</h3></div>
+    <pre><code><span class="k">late</span> Future&lt;List&lt;User&gt;&gt; _usersFuture;
+
+@override
+<span class="k">void</span> initState() {
+  <span class="k">super</span>.initState();
+  _usersFuture = fetchUsers();     <span class="c">// start the request ONCE, here</span>
+}
+
+FutureBuilder&lt;List&lt;User&gt;&gt;(
+  future: _usersFuture,
+  builder: (context, snapshot) {
+    <span class="k">if</span> (snapshot.connectionState == ConnectionState.waiting) <span class="k">return</span> Spinner();   <span class="c">// loading</span>
+    <span class="k">if</span> (snapshot.hasError) <span class="k">return</span> ErrorView(snapshot.error);                       <span class="c">// error</span>
+    <span class="k">final</span> users = snapshot.data ?? [];
+    <span class="k">if</span> (users.isEmpty) <span class="k">return</span> Text(<span class="k">'No users found.'</span>);                           <span class="c">// empty</span>
+    <span class="k">return</span> ListView.builder(...);                                                <span class="c">// data</span>
+  },
+)</code></pre>
+    <p><b>Never call <code>fetchUsers()</code> inside <code>build()</code>.</b> <code>build</code> runs many times, and each run would send a new request. Start it in <code>initState</code> and keep the Future in a field. Retry calls <code>setState</code> with a new Future.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo3</span><h3>FutureProvider and AsyncValue</h3></div>
+    <p>The same screen, the Riverpod way. No StatefulWidget, no <code>initState</code>, no Future in a field: the provider remembers the result.</p>
+    <pre><code><span class="k">final</span> usersProvider = FutureProvider&lt;List&lt;User&gt;&gt;((ref) {
+  <span class="k">return</span> fetchUsers();
+});
+
+<span class="c">// in a ConsumerWidget:</span>
+<span class="k">final</span> usersAsync = ref.watch(usersProvider);     <span class="c">// AsyncValue: loading OR error OR data</span>
+
+<span class="k">return</span> usersAsync.when(
+  loading: () =&gt; Spinner(),
+  error: (error, stackTrace) =&gt; ErrorView(
+    message: error.toString(),
+    onRetry: () =&gt; ref.invalidate(usersProvider),   <span class="c">// fetch again</span>
+  ),
+  data: (users) =&gt; users.isEmpty ? Text(<span class="k">'No users found.'</span>) : ListView.builder(...),
+);</code></pre>
+    <ul class="points">
+      <li><code>.when</code> makes you write all three. Forget one and it won't compile.</li>
+      <li><code>ref.invalidate(usersProvider)</code> throws away the old result and fetches again.</li>
+      <li>Pull to refresh: <code>RefreshIndicator(onRefresh: () =&gt; ref.refresh(usersProvider.future), ...)</code>.</li>
+      <li>The provider <b>watches</b> the Break and Empty switches, so flipping a switch fetches again by itself.</li>
+    </ul>
+    <div class="table-wrap"><table>
+      <tr><th></th><th>FutureBuilder (demo 2)</th><th>FutureProvider (demo 3)</th></tr>
+      <tr><td>Where the Future lives</td><td>A field in a State class</td><td>The provider</td></tr>
+      <tr><td>Start the request</td><td><code>initState</code></td><td>Automatically, the first time it's watched</td></tr>
+      <tr><td>Check the state</td><td><code>if</code> on <code>snapshot</code></td><td><code>.when(loading, error, data)</code></td></tr>
+      <tr><td>Retry</td><td><code>setState</code> with a new Future</td><td><code>ref.invalidate(provider)</code></td></tr>
+      <tr><td>Use the data on another screen</td><td>Pass it through constructors</td><td>Just <code>ref.watch</code> the same provider</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<section>
+  <h2>The project: Joke App</h2>
+  <p>One screen with a joke in the middle: the setup, then the punchline. While a joke loads you see a spinner. If it fails you see a clear message, and the button becomes “Try again”. Tap <b>Next joke</b> for a new one.</p>
+  <div class="stage tree">
+<div>lib/joke_app/</div>
+<div>├─ <span class="hl">main.dart</span> <span class="note">· ProviderScope with retry turned off</span></div>
+<div>├─ models/<span class="hl">joke.dart</span> <span class="note">· Joke.fromJson</span></div>
+<div>├─ services/<span class="hl">joke_service.dart</span> <span class="note">· all network code and error messages</span></div>
+<div>├─ providers/<span class="hl">joke_providers.dart</span> <span class="note">· httpClient → service → jokeProvider</span></div>
+<div>└─ screens/<span class="hl">joke_screen.dart</span> <span class="note">· .when + Next joke</span></div>
+  </div>
+  <div class="table-wrap"><table>
+    <tr><th>File</th><th>What to look for</th></tr>
+    <tr><td><code>joke_service.dart</code></td><td>The four error types turned into readable messages. The <code>http.Client</code> is passed in, so tests can give it a fake server.</td></tr>
+    <tr><td><code>joke_providers.dart</code></td><td>Three providers in a chain: <code>httpClientProvider</code> → <code>jokeServiceProvider</code> → <code>jokeProvider</code> (a FutureProvider).</td></tr>
+    <tr><td><code>joke_screen.dart</code></td><td><code>.when</code> for the three states. Next joke is <code>ref.invalidate(jokeProvider)</code>, and the button is disabled while loading.</td></tr>
+    <tr><td><code>test/joke_app_test.dart</code></td><td>A fake server (<code>MockClient</code>) tests a working joke, a 500 error with retry, and no internet, without touching the real internet.</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Errors you will see today</h2>
+  <div class="err">
+    <div class="err-item"><b>Spinner forever, and the request is sent again and again</b><span>You called the fetch function inside <code>build()</code>. Start it in <code>initState</code>, or use a FutureProvider.</span></div>
+    <div class="err-item"><b>“type 'List&lt;dynamic&gt;' is not a subtype of type 'Map&lt;String, dynamic&gt;'”</b><span>The API returned a list <code>[...]</code> and you treated it as one object <code>{...}</code>, or the other way round. Open the URL in a browser and check the first character.</span></div>
+    <div class="err-item"><b>“type 'Null' is not a subtype of type 'String'” inside fromJson</b><span>A key is misspelled, or the value is nested one level deeper (like <code>company.name</code>).</span></div>
+    <div class="err-item"><b>“ClientException: Failed to fetch” in Chrome</b><span>Wrong address, <code>http://</code> instead of <code>https://</code>, or an API that doesn't allow browsers. Today's APIs all work in Chrome.</span></div>
+    <div class="err-item"><b>The error screen takes about 30 seconds to appear</b><span>Riverpod 3's automatic retry. Add <code>retry: (retryCount, error) =&gt; null</code> to <code>ProviderScope</code>.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Practice task (in class)</h2>
+  <ul class="checks">
+    <li><input type="checkbox" id="p1"><label for="p1">Fetch posts from <code>https://jsonplaceholder.typicode.com/posts</code>.</label></li>
+    <li><input type="checkbox" id="p2"><label for="p2">Parse them into a <code>Post</code> model with <code>id</code>, <code>title</code> and <code>body</code>, using <code>fromJson</code>.</label></li>
+    <li><input type="checkbox" id="p3"><label for="p3">Show them in a <code>ListView.builder</code>.</label></li>
+    <li><input type="checkbox" id="p4"><label for="p4">Handle all four states: loading spinner, error message with Retry, empty, data.</label></li>
+    <li><input type="checkbox" id="p5"><label for="p5">Bonus: tap a post to open a detail screen.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Homework: extend the Joke App</h2>
+  <ul class="checks">
+    <li><input type="checkbox" id="h1"><label for="h1">Hide the punchline until the user taps <b>Show punchline</b>.</label></li>
+    <li><input type="checkbox" id="h2"><label for="h2">Add a “Programming jokes only” switch using <code>https://official-joke-api.appspot.com/jokes/programming/random</code>. Careful: this one returns a <b>list</b> with one joke inside.</label></li>
+    <li><input type="checkbox" id="h3"><label for="h3">Show “Joke #id” on the card.</label></li>
+    <li><input type="checkbox" id="h4"><label for="h4">Commit your work and push it to GitHub.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Check yourself</h2>
+  <div class="qa">
+    <details><summary>What do status codes 200, 404 and 500 mean?</summary><p>200: it worked. 404: not found. 500: the server broke.</p></details>
+    <details><summary>Why must the fetch not be called inside build()?</summary><p>build() runs many times. Each run would send a new request, and the screen would keep reloading.</p></details>
+    <details><summary>What are the four states of a loading screen?</summary><p>Loading, error, empty and data.</p></details>
+    <details><summary>What does fromJson do, and what happens if a key is misspelled?</summary><p>It builds one model object from one JSON Map. A misspelled key gives null, so the app crashes at runtime with a “Null is not a subtype” error.</p></details>
+    <details><summary>What does ref.invalidate(jokeProvider) do?</summary><p>It throws away the current result and runs the provider again, which fetches a new joke.</p></details>
+  </div>
+</section>
+
+<section>
+  <span class="label">Next session</span>
+  <p><b>Session 7 · Local Storage + Checkpoint 1.</b> Saving data on the phone with <code>shared_preferences</code> so it survives a restart, then your first checkpoint project.</p>
+</section>
+
+</div>
+
+</body>
+</html>

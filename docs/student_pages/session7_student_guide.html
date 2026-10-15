@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Session 7 · Local Storage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: same reading column and Debug Paint styling as Session 3, plus a labelled-jar shelf and a framed checkpoint brief */
+:root {
+  --ground: #f5f8fa;
+  --paper: #ffffff;
+  --ink: #14212b;
+  --muted: #566672;
+  --line: #d3dde4;
+  --accent: #0a6fb8;
+  --accent-soft: #e2f0fa;
+  --paint: #11a3a3;          /* Debug Paint cyan for outlines */
+  --warn: #b5450b;
+  --warn-soft: #fbeee6;
+  --ok: #1f7a3d;
+  --code-bg: #eef3f6;
+  --box1: #e86a4a; --box2: #2f9e5f; --box3: #3478c6;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --s-1: 0.8125rem; --s0: 1rem; --s1: 1.25rem; --s2: 1.6rem; --s3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+    --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+    --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+    --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+  --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+  --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+  --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: var(--s0); line-height: 1.65;
+  padding-inline: 20px; padding-block: 0 72px;
+}
+.wrap { max-width: 760px; margin-inline: auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: var(--s2); font-weight: 800; }
+h3 { font-size: var(--s1); font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre {
+  margin: 0; font-family: var(--mono); font-size: var(--s-1); line-height: 1.6;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; color: var(--ink);
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+.k { color: var(--accent); font-weight: 600; }
+.c { color: var(--muted); }
+.label {
+  font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--paint); font-weight: 600;
+}
+section { display: grid; gap: 18px; }
+
+/* Header */
+header { padding-block: 48px 0; display: grid; gap: 16px; }
+header h1 { font-size: clamp(2.2rem, 7vw, var(--s3)); font-weight: 800; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.goal {
+  border: 1.5px dashed var(--paint); border-radius: 10px; padding: 16px 18px;
+  background: var(--paper); display: grid; gap: 6px;
+}
+
+/* Concept blocks */
+.concept { border-top: 1px solid var(--line); padding-top: 28px; display: grid; gap: 14px; }
+.concept-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.demo-num {
+  font-family: var(--mono); font-size: var(--s-1); color: var(--paint);
+  border: 1.5px dashed var(--paint); border-radius: 6px; padding: 0 7px;
+}
+.run { font-family: var(--mono); font-size: var(--s-1); color: var(--muted); }
+.run b { color: var(--ink); font-weight: 600; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 65ch; }
+
+/* Mini layouts drawn like Debug Paint */
+.stage {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: grid; gap: 12px;
+}
+.stage-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.stage-row .cap { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.track {
+  outline: 1.5px dashed var(--paint); outline-offset: -1px; min-height: 56px;
+  display: flex; align-items: center; padding: 4px;
+}
+.b { width: 30px; flex: none; border-radius: 3px; }
+.b1 { background: var(--box1); height: 22px; }
+.b2 { background: var(--box2); height: 40px; }
+.b3 { background: var(--box3); height: 30px; }
+.box-label { color: #fff; font-family: var(--mono); font-size: 0.7rem; display: grid; place-items: center; height: 40px; border-radius: 3px; }
+
+.boxmodel { display: flex; gap: 16px; flex-wrap: wrap; }
+.bm { flex: 1 1 200px; display: grid; gap: 6px; }
+.bm-outer { outline: 1.5px dashed var(--muted); padding: 18px; position: relative; }
+.bm-box { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.bm-pad { padding: 18px; }
+.bm-child { background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 0.72rem; padding: 4px 8px; }
+
+.stack-demo { position: relative; height: 130px; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(135deg, var(--box1), var(--box3)); }
+.stack-demo .badge { position: absolute; top: 10px; left: 10px; background: var(--paper); color: var(--ink);
+  font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+.stack-demo .heart { position: absolute; bottom: 10px; right: 12px; color: #fff; font-size: 1.3rem; }
+.stack-demo .pos { position: absolute; font-family: var(--mono); font-size: 0.68rem; color: #fff; opacity: .85; }
+
+.grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid-demo div { height: 44px; border-radius: 6px; outline: 1.5px dashed var(--paint); outline-offset: -1px;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+.list-demo { display: grid; gap: 0; outline: 1.5px dashed var(--paint); outline-offset: -1px; max-height: 150px; overflow: hidden; position: relative; }
+.list-demo div { padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: var(--s-1); display: flex; justify-content: space-between; }
+.list-demo div span { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; }
+.list-demo::after { content: "rows 10 – 999 not built yet"; position: absolute; inset: auto 0 0 0; padding: 6px 12px;
+  background: linear-gradient(transparent, var(--paper) 55%); font-family: var(--mono); font-size: 0.7rem; color: var(--paint); text-align: right; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td code { white-space: nowrap; }
+
+/* File tree */
+.tree { font-family: var(--mono); font-size: var(--s-1); line-height: 1.8; }
+.tree .note { color: var(--muted); }
+.tree .hl { color: var(--accent); font-weight: 600; }
+
+/* Errors */
+.err { display: grid; gap: 10px; }
+.err-item { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; display: grid; gap: 4px; }
+.err-item b { font-family: var(--mono); font-size: var(--s-1); color: var(--warn); font-weight: 600; }
+
+/* Checklist */
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; }
+.checks input { margin-top: 5px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.checks label { cursor: pointer; }
+
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+details summary { cursor: pointer; font-weight: 500; }
+details p { margin-top: 8px; color: var(--muted); }
+.qa { display: grid; gap: 8px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .stage-row { grid-template-columns: 1fr; gap: 4px; }
+}
+/* Session 7 additions */
+.note-box { border: 1.5px dashed var(--paint); border-radius: 10px; padding: 12px 16px; background: var(--paper); display: grid; gap: 6px; }
+.shelf { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.jar { background: var(--paper); border: 1.5px dashed var(--paint); border-radius: 14px 14px 10px 10px; padding: 12px; display: grid; gap: 4px; }
+.jar .key { font-family: var(--mono); font-size: 0.75rem; color: var(--paint); font-weight: 600; }
+.jar .val { font-family: var(--mono); font-size: 0.85rem; }
+.jar .type { font-size: 0.75rem; color: var(--muted); }
+.cp { border: 2px solid var(--accent); border-radius: 14px; padding: 20px; background: var(--paper); display: grid; gap: 16px; }
+.cp h2 { color: var(--accent); }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: rule; }
+.rules li { counter-increment: rule; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; background: var(--ground); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.rules li::before { content: counter(rule); font-family: var(--mono); font-weight: 600; color: var(--paint); border: 1.5px dashed var(--paint); border-radius: 6px; text-align: center; font-size: var(--s-1); line-height: 1.6; }
+td.pts { font-family: var(--mono); text-align: right; white-space: nowrap; }
+tr.total td { font-weight: 600; }
+
+/* Show => and != as typed, not as joined symbols */
+code, pre { font-variant-ligatures: none; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="label">Flutter course · Session 7 of 15</span>
+  <h1>Local Storage <span>+</span> Checkpoint 1</h1>
+  <p class="lede">Every app so far forgets everything when it closes. Today you'll save small things on the phone (settings, favourites) so they're still there next time, and combine that with Riverpod. Then you start your first checkpoint project.</p>
+  <div class="goal">
+    <span class="label">By the end of today you can</span>
+    <p>Save and load simple values and lists with <code>shared_preferences</code>, load saved data when the app starts, and keep saved data in sync with Riverpod state.</p>
+  </div>
+</header>
+
+<section>
+  <h2>Setup</h2>
+  <pre><code>flutter pub add shared_preferences</code></pre>
+  <p>Today's apps are in the <b>Session 7</b> group of the Run and Debug dropdown. It works on Android, iOS, desktop and Chrome; in Chrome the data is kept in the browser.</p>
+  <div class="note-box">
+    <span class="label">How to test saving</span>
+    <p>After saving something, <b>fully restart</b> the app: stop it and run again, or refresh the Chrome tab. Hot reload keeps everything in memory, so it doesn't prove anything was saved.</p>
+    <p><b>In Chrome, always use the same port</b>, or a new run will start with empty storage: <code>flutter run -d chrome --web-port 5050</code>.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The big picture: a shelf of labelled jars</h2>
+  <p>Normal variables live in the app's short-term memory. Close the app and they're gone. <code>shared_preferences</code> is a <b>shelf of labelled jars</b> on the phone. Each jar has a <b>key</b> (its label) and holds one small thing.</p>
+  <div class="shelf">
+    <div class="jar"><span class="key">"name"</span><span class="val">"Ravi"</span><span class="type">String</span></div>
+    <div class="jar"><span class="key">"darkMode"</span><span class="val">true</span><span class="type">bool</span></div>
+    <div class="jar"><span class="key">"openCount"</span><span class="val">4</span><span class="type">int</span></div>
+    <div class="jar"><span class="key">"favouriteCities"</span><span class="val">["Pune","Delhi"]</span><span class="type">List&lt;String&gt;</span></div>
+  </div>
+  <p>The shelf is for <b>small</b> things: settings, favourites, a login token. A big collection, like all your notes, belongs in a database. That's Firestore, in Session 9.</p>
+</section>
+
+<section>
+  <h2>Storage words, in plain English</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Code</th><th>What it does</th></tr>
+    <tr><td><code>await SharedPreferences.getInstance()</code></td><td>Open the shelf. Do this once, then keep the object.</td></tr>
+    <tr><td><code>prefs.setString('name', 'Ravi')</code></td><td>Put a value in the jar labelled <code>name</code>. Also <code>setBool</code>, <code>setInt</code>, <code>setDouble</code>, <code>setStringList</code>.</td></tr>
+    <tr><td><code>prefs.getString('name')</code></td><td>Look in the jar. Returns <b>null</b> if it was never filled. Also <code>getBool</code>, <code>getInt</code>, <code>getDouble</code>, <code>getStringList</code>.</td></tr>
+    <tr><td><code>prefs.getInt('openCount') ?? 0</code></td><td>Use 0 when nothing was saved yet (<code>??</code> from Session 1).</td></tr>
+    <tr><td><code>prefs.remove('name')</code></td><td>Empty one jar.</td></tr>
+    <tr><td><code>prefs.clear()</code></td><td>Empty every jar.</td></tr>
+    <tr><td><code>jsonEncode(quote.toJson())</code></td><td>The shelf only holds simple types. To save an object, turn it into a JSON String first.</td></tr>
+    <tr><td><code>Quote.fromJson(jsonDecode(text))</code></td><td>…and turn it back into an object when you load it.</td></tr>
+    <tr><td><code>WidgetsFlutterBinding.ensureInitialized()</code></td><td>Required in an <code>async main()</code> before using a plugin like shared_preferences.</td></tr>
+    <tr><td><code>overrideWithValue(prefs)</code></td><td>Plug the opened shelf into a provider when the app starts, so every screen can use it with no waiting.</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>The concepts, in the order we cover them</h2>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo1</span><h3>Saving simple values</h3></div>
+    <p>A settings screen: your name, a dark-mode switch, and how many times you've opened the app. Change them, restart, and they're still there.</p>
+    <pre><code><span class="k">const</span> _kName = <span class="k">'name'</span>;   <span class="c">// keys as constants: a typo can't create a second jar</span>
+
+<span class="c">// Load when the screen starts (called from initState)</span>
+<span class="k">final</span> prefs = <span class="k">await</span> SharedPreferences.getInstance();
+_nameController.text = prefs.getString(_kName) ?? <span class="k">''</span>;
+_darkMode = prefs.getBool(_kDarkMode) ?? <span class="k">false</span>;
+
+<span class="c">// Save</span>
+<span class="k">await</span> prefs.setString(_kName, _nameController.text.trim());
+<span class="k">await</span> prefs.setBool(_kDarkMode, value);</code></pre>
+    <p>While the shelf is opening, the screen shows a spinner. Opening is fast, but it's still a <code>Future</code>.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo2</span><h3>Saving a list</h3></div>
+    <p>Tap hearts on a list of cities. The names of your favourites are saved as a <code>List&lt;String&gt;</code>. Restart and the hearts are still red.</p>
+    <pre><code>_favourites = prefs.getStringList(<span class="k">'favouriteCities'</span>) ?? [];   <span class="c">// load</span>
+
+<span class="k">await</span> prefs.setStringList(<span class="k">'favouriteCities'</span>, _favourites);    <span class="c">// save the whole list after every change</span></code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo3</span><h3>Storage + Riverpod</h3></div>
+    <p>The same cities, but the favourites live in a Notifier. It <b>loads</b> them in <code>build()</code> and <b>saves</b> them every time they change. The screens just call <code>toggle()</code>; they don't know storage exists.</p>
+    <pre><code><span class="c">// 1. A provider for the shelf, with no real value yet</span>
+<span class="k">final</span> sharedPreferencesProvider = Provider&lt;SharedPreferences&gt;((ref) {
+  <span class="k">throw</span> UnimplementedError(<span class="k">'Override sharedPreferencesProvider in main()'</span>);
+});
+
+<span class="c">// 2. main opens the shelf BEFORE the app starts, and plugs it in</span>
+Future&lt;<span class="k">void</span>&gt; main() <span class="k">async</span> {
+  WidgetsFlutterBinding.ensureInitialized();
+  <span class="k">final</span> prefs = <span class="k">await</span> SharedPreferences.getInstance();
+  runApp(ProviderScope(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    child: <span class="k">const</span> MyApp(),
+  ));
+}
+
+<span class="c">// 3. The Notifier loads at the start and saves on every change</span>
+<span class="k">class</span> FavouritesNotifier <span class="k">extends</span> Notifier&lt;List&lt;String&gt;&gt; {
+  @override
+  List&lt;String&gt; build() =&gt;
+      ref.watch(sharedPreferencesProvider).getStringList(<span class="k">'favouriteCities'</span>) ?? [];   <span class="c">// load</span>
+
+  <span class="k">void</span> toggle(String city) {
+    state = state.contains(city) ? state.where((c) =&gt; c != city).toList() : [...state, city];
+    ref.read(sharedPreferencesProvider).setStringList(<span class="k">'favouriteCities'</span>, state);    <span class="c">// save</span>
+  }
+}</code></pre>
+    <p>Because <code>main</code> opens the shelf first, there's no loading spinner anywhere, and every screen sees the saved favourites on the very first frame.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The project: Quotes App</h2>
+  <p>Sessions 6 and 7 together. The main screen loads 20 quotes from the internet. Tap the heart to save a quote to <b>My favourites</b>. Favourites are saved on the device, so they're still there after a restart, and they work with <b>no internet</b>. Pull down to load a different set of quotes.</p>
+  <div class="stage tree">
+<div>lib/quotes_app/</div>
+<div>├─ <span class="hl">main.dart</span> <span class="note">· async main, opens storage, overrideWithValue</span></div>
+<div>├─ <span class="hl">routes.dart</span> <span class="note">· class AppRoutes</span></div>
+<div>├─ models/<span class="hl">quote.dart</span> <span class="note">· fromJson AND toJson</span></div>
+<div>├─ services/<span class="hl">quote_service.dart</span> <span class="note">· fetches quotes, error messages</span></div>
+<div>├─ providers/<span class="hl">quote_providers.dart</span> <span class="note">· quotesProvider + FavouritesNotifier</span></div>
+<div>├─ widgets/<span class="hl">quote_card.dart</span> <span class="note">· used on both screens</span></div>
+<div>└─ screens/ <span class="note">· quotes_screen.dart, favourites_screen.dart</span></div>
+  </div>
+  <div class="table-wrap"><table>
+    <tr><th>File</th><th>What to look for</th></tr>
+    <tr><td><code>quote.dart</code></td><td><code>toJson</code> uses the same keys as the API, so <code>fromJson</code> reads both the API and the saved copies.</td></tr>
+    <tr><td><code>quote_providers.dart</code></td><td>Favourites are saved as a list of JSON strings, one per quote. Saving the whole quote, not just its id, is what makes them work offline.</td></tr>
+    <tr><td><code>quotes_screen.dart</code></td><td><code>.when</code>, pull to refresh, and an error screen with a shortcut to your saved favourites.</td></tr>
+    <tr><td><code>favourites_screen.dart</code></td><td>Reads only from storage. Works with no internet. Has an empty state.</td></tr>
+    <tr><td><code>test/quotes_app_test.dart</code></td><td>Checks that a favourite is saved, and that saved favourites load on start and work offline.</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Errors you will see today</h2>
+  <div class="err">
+    <div class="err-item"><b>Saved data is gone after a restart</b><span>You forgot <code>await</code> on <code>set...</code>, or you tested with hot reload instead of a full restart.</span></div>
+    <div class="err-item"><b>In Chrome, everything is gone after you stop and run the app again</b><span>Flutter picks a new random port on every run (<code>localhost:61207</code>, then <code>localhost:54321</code>…), and Chrome keeps saved data separately for each address. Run on a fixed port: <code>flutter run -d chrome --web-port 5050</code> (the Session 7 entries in VS Code already do this). Refreshing the tab keeps the same port, so it always works. Phones and emulators don't have this problem.</span></div>
+    <div class="err-item"><b>“Binding has not yet been initialized”</b><span>Add <code>WidgetsFlutterBinding.ensureInitialized();</code> as the first line of your <code>async main()</code>.</span></div>
+    <div class="err-item"><b>“UnimplementedError: Override sharedPreferencesProvider in main()”</b><span>You forgot <code>overrides: [sharedPreferencesProvider.overrideWithValue(prefs)]</code> in <code>ProviderScope</code>.</span></div>
+    <div class="err-item"><b>You can't save a model object</b><span>The shelf only holds simple types. Use <code>jsonEncode(item.toJson())</code> to save and <code>Item.fromJson(jsonDecode(text))</code> to load.</span></div>
+    <div class="err-item"><b>Old test data keeps showing in Chrome</b><span>Chrome keeps the data for each address. Clear it with <code>prefs.clear()</code> (demo 1 has a “Forget everything” button).</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Practice task (in class)</h2>
+  <ul class="checks">
+    <li><input type="checkbox" id="p1"><label for="p1">Open your Session 6 practice app (the posts list).</label></li>
+    <li><input type="checkbox" id="p2"><label for="p2">Add a heart to each post that marks it as a favourite.</label></li>
+    <li><input type="checkbox" id="p3"><label for="p3">Save the favourites with <code>shared_preferences</code>. They're still red after a full restart.</label></li>
+    <li><input type="checkbox" id="p4"><label for="p4">Add a Favourites screen with an empty state.</label></li>
+  </ul>
+</section>
+
+<section class="cp">
+  <span class="label">Checkpoint project 1 · fundamentals check · Sessions 1–7</span>
+  <h2>Product Catalog App</h2>
+  <p>Build a shopping catalog from scratch. Products come from a real API, you can open each one, mark favourites, and your favourites are still there after a restart. This checks everything we've covered: Dart, widgets, layouts, navigation, forms, Riverpod, APIs and local storage.</p>
+
+  <h3>What the app does</h3>
+  <ul class="points">
+    <li><b>Product list:</b> loads products and shows them in a grid or list: thumbnail, title, price, rating.</li>
+    <li><b>Product detail:</b> tap a product to see a large image, title, brand, price, discount, rating, stock and description, plus a favourite button.</li>
+    <li><b>Favourites:</b> a screen listing your favourite products, saved on the device and still there after a restart.</li>
+    <li><b>Search:</b> a validated form field (at least 2 characters) that searches products.</li>
+    <li>Proper <b>loading</b>, <b>empty</b> and <b>error</b> states on every screen that loads data, with Retry.</li>
+  </ul>
+
+  <h3>API (free, no key, works in Chrome)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Address</th><th>Gives you</th></tr>
+    <tr><td><code>https://dummyjson.com/products?limit=30</code></td><td><code>{"products": [...], "total": 194, ...}</code>. The list is inside <code>"products"</code>.</td></tr>
+    <tr><td><code>https://dummyjson.com/products/1</code></td><td>One product</td></tr>
+    <tr><td><code>https://dummyjson.com/products/search?q=phone</code></td><td>Search results, same shape as the list</td></tr>
+    <tr><td><code>https://dummyjson.com/products/category-list</code></td><td>Category names (bonus)</td></tr>
+  </table></div>
+
+  <h3>Model</h3>
+  <pre><code><span class="k">class</span> Product {
+  <span class="k">final</span> int id;
+  <span class="k">final</span> String title;
+  <span class="k">final</span> String description;
+  <span class="k">final</span> String category;
+  <span class="k">final</span> double price;              <span class="c">// prices are in US dollars, show "$"</span>
+  <span class="k">final</span> double discountPercentage;
+  <span class="k">final</span> double rating;
+  <span class="k">final</span> int stock;
+  <span class="k">final</span> String? brand;             <span class="c">// some products have NO brand → nullable</span>
+  <span class="k">final</span> String thumbnail;
+  <span class="k">final</span> List&lt;String&gt; images;
+
+  <span class="k">factory</span> Product.fromJson(Map&lt;String, dynamic&gt; json) { ... }
+  Map&lt;String, dynamic&gt; toJson() { ... }   <span class="c">// for saving favourites</span>
+}</code></pre>
+  <div class="note-box">
+    <span class="label">Two traps in this API</span>
+    <p><b>Numbers:</b> a price of 10 arrives as <code>10</code>, not <code>10.0</code>, so <code>json['price'] as double</code> crashes. Write <code>(json['price'] as num).toDouble()</code> for <code>price</code>, <code>discountPercentage</code> and <code>rating</code>.</p>
+    <p><b>Missing brand:</b> groceries have no <code>brand</code> key. Use <code>json['brand'] as String?</code> and show nothing (or “No brand”) when it's null.</p>
+  </div>
+
+  <h3>Rules</h3>
+  <ol class="rules">
+    <li><div><b>Named routes</b> with an <code>AppRoutes</code> class. Pass the product (or its id) to the detail screen.</div></li>
+    <li><div><b>Typed model classes</b> with <code>fromJson</code>. No <code>json['...']</code> in widgets.</div></li>
+    <li><div><b>All network code in a service class</b>, with a timeout and readable messages for no internet, server errors and bad data.</div></li>
+    <li><div><b>Riverpod:</b> a <code>FutureProvider</code> for the products, and a <code>NotifierProvider</code> for favourites.</div></li>
+    <li><div><b>Favourites persist</b> with <code>shared_preferences</code>: they're still there after a full restart, and the Favourites screen works offline.</div></li>
+    <li><div><b>Four states</b> (loading, error with Retry, empty, data) on the list, search and detail screens.</div></li>
+    <li><div><b>Theme only:</b> colours and fonts from <code>ThemeData</code>, no <code>Colors.xxx</code> in screens.</div></li>
+    <li><div><b>Form validation:</b> the search field rejects empty input and fewer than 2 characters.</div></li>
+    <li><div><b>No overflow</b> on a 360 px-wide phone. Long titles use <code>TextOverflow.ellipsis</code>.</div></li>
+    <li><div><b>Git:</b> at least 6 commits with clear messages, pushed to GitHub, with a README and screenshots.</div></li>
+  </ol>
+
+  <h3>Grading</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Area</th><th>What we check</th><th style="text-align:right">Points</th></tr>
+    <tr><td>Dart &amp; models</td><td>fromJson/toJson, null safety (brand), num → double, clean classes</td><td class="pts">15</td></tr>
+    <tr><td>Widgets &amp; layout</td><td>Grid or list, detail layout, theme only, no overflow</td><td class="pts">15</td></tr>
+    <tr><td>Navigation &amp; forms</td><td>Named routes, data passed to detail, validated search</td><td class="pts">15</td></tr>
+    <tr><td>Riverpod</td><td>FutureProvider, favourites Notifier, watch vs read used correctly</td><td class="pts">15</td></tr>
+    <tr><td>API integration</td><td>Service class, timeout, readable errors, Retry works</td><td class="pts">15</td></tr>
+    <tr><td>Local storage</td><td>Favourites persist across restarts and work offline</td><td class="pts">15</td></tr>
+    <tr><td>Code quality &amp; Git</td><td>Folders (models, services, providers, screens, widgets), commits, README</td><td class="pts">10</td></tr>
+    <tr class="total"><td>Total</td><td></td><td class="pts">100</td></tr>
+  </table></div>
+
+  <h3>Bonus</h3>
+  <ul class="points">
+    <li>Category chips from <code>/products/category-list</code> that filter the list (<code>/products/category/{name}</code>).</li>
+    <li>An image carousel on the detail screen using <code>images</code> and a <code>PageView</code>.</li>
+    <li>Pull to refresh on the list.</li>
+  </ul>
+
+  <h3>How to submit</h3>
+  <ul class="checks">
+    <li><input type="checkbox" id="s1"><label for="s1">Push to a public GitHub repository.</label></li>
+    <li><input type="checkbox" id="s2"><label for="s2">README with screenshots of the list, detail, favourites, one error state and one empty state.</label></li>
+    <li><input type="checkbox" id="s3"><label for="s3">Run <code>flutter analyze</code> and fix every warning.</label></li>
+    <li><input type="checkbox" id="s4"><label for="s4">Send the repository link to your teacher.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Check yourself</h2>
+  <div class="qa">
+    <details><summary>Why is a normal variable lost when the app restarts?</summary><p>It lives in the app's memory, which is cleared when the app closes. shared_preferences writes to the device's storage instead.</p></details>
+    <details><summary>What does prefs.getString('name') return if nothing was saved?</summary><p>null. That's why we write <code>prefs.getString('name') ?? ''</code>.</p></details>
+    <details><summary>How do you save a whole object?</summary><p>Turn it into a JSON String with <code>jsonEncode(object.toJson())</code>, and back with <code>fromJson(jsonDecode(text))</code>.</p></details>
+    <details><summary>Why call ensureInitialized() before getInstance() in main?</summary><p>Plugins need Flutter's engine to be ready. In an async main, nothing has started it yet, so we start it ourselves.</p></details>
+    <details><summary>What belongs in shared_preferences, and what doesn't?</summary><p>Small things: settings, favourites, a token. Not large collections of data. Those go in a database such as Firestore.</p></details>
+  </div>
+</section>
+
+<section>
+  <span class="label">Next session</span>
+  <p><b>Session 8 · Firebase Setup &amp; Authentication.</b> Real accounts: register, log in, log out, and stay logged in after a restart. The Paws &amp; Homes login screen gets a real backend.</p>
+</section>
+
+</div>
+
+</body>
+</html>

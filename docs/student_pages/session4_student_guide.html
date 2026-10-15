@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Session 4 · Navigation &amp; Forms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: same reading column and Debug Paint styling as Session 3, plus screen-stack, data-flow, lifecycle and form diagrams */
+:root {
+  --ground: #f5f8fa;
+  --paper: #ffffff;
+  --ink: #14212b;
+  --muted: #566672;
+  --line: #d3dde4;
+  --accent: #0a6fb8;
+  --accent-soft: #e2f0fa;
+  --paint: #11a3a3;          /* Debug Paint cyan for outlines */
+  --warn: #b5450b;
+  --warn-soft: #fbeee6;
+  --ok: #1f7a3d;
+  --code-bg: #eef3f6;
+  --box1: #e86a4a; --box2: #2f9e5f; --box3: #3478c6;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --s-1: 0.8125rem; --s0: 1rem; --s1: 1.25rem; --s2: 1.6rem; --s3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+    --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+    --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+    --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+  --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+  --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+  --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: var(--s0); line-height: 1.65;
+  padding-inline: 20px; padding-block: 0 72px;
+}
+.wrap { max-width: 760px; margin-inline: auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: var(--s2); font-weight: 800; }
+h3 { font-size: var(--s1); font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre {
+  margin: 0; font-family: var(--mono); font-size: var(--s-1); line-height: 1.6;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; color: var(--ink);
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+.k { color: var(--accent); font-weight: 600; }
+.c { color: var(--muted); }
+.label {
+  font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--paint); font-weight: 600;
+}
+section { display: grid; gap: 18px; }
+
+/* Header */
+header { padding-block: 48px 0; display: grid; gap: 16px; }
+header h1 { font-size: clamp(2.2rem, 7vw, var(--s3)); font-weight: 800; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.goal {
+  border: 1.5px dashed var(--paint); border-radius: 10px; padding: 16px 18px;
+  background: var(--paper); display: grid; gap: 6px;
+}
+
+/* Concept blocks */
+.concept { border-top: 1px solid var(--line); padding-top: 28px; display: grid; gap: 14px; }
+.concept-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.demo-num {
+  font-family: var(--mono); font-size: var(--s-1); color: var(--paint);
+  border: 1.5px dashed var(--paint); border-radius: 6px; padding: 0 7px;
+}
+.run { font-family: var(--mono); font-size: var(--s-1); color: var(--muted); }
+.run b { color: var(--ink); font-weight: 600; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 65ch; }
+
+/* Mini layouts drawn like Debug Paint */
+.stage {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: grid; gap: 12px;
+}
+.stage-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.stage-row .cap { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.track {
+  outline: 1.5px dashed var(--paint); outline-offset: -1px; min-height: 56px;
+  display: flex; align-items: center; padding: 4px;
+}
+.b { width: 30px; flex: none; border-radius: 3px; }
+.b1 { background: var(--box1); height: 22px; }
+.b2 { background: var(--box2); height: 40px; }
+.b3 { background: var(--box3); height: 30px; }
+.box-label { color: #fff; font-family: var(--mono); font-size: 0.7rem; display: grid; place-items: center; height: 40px; border-radius: 3px; }
+
+.boxmodel { display: flex; gap: 16px; flex-wrap: wrap; }
+.bm { flex: 1 1 200px; display: grid; gap: 6px; }
+.bm-outer { outline: 1.5px dashed var(--muted); padding: 18px; position: relative; }
+.bm-box { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.bm-pad { padding: 18px; }
+.bm-child { background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 0.72rem; padding: 4px 8px; }
+
+.stack-demo { position: relative; height: 130px; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(135deg, var(--box1), var(--box3)); }
+.stack-demo .badge { position: absolute; top: 10px; left: 10px; background: var(--paper); color: var(--ink);
+  font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+.stack-demo .heart { position: absolute; bottom: 10px; right: 12px; color: #fff; font-size: 1.3rem; }
+.stack-demo .pos { position: absolute; font-family: var(--mono); font-size: 0.68rem; color: #fff; opacity: .85; }
+
+.grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid-demo div { height: 44px; border-radius: 6px; outline: 1.5px dashed var(--paint); outline-offset: -1px;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+.list-demo { display: grid; gap: 0; outline: 1.5px dashed var(--paint); outline-offset: -1px; max-height: 150px; overflow: hidden; position: relative; }
+.list-demo div { padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: var(--s-1); display: flex; justify-content: space-between; }
+.list-demo div span { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; }
+.list-demo::after { content: "rows 10 – 999 not built yet"; position: absolute; inset: auto 0 0 0; padding: 6px 12px;
+  background: linear-gradient(transparent, var(--paper) 55%); font-family: var(--mono); font-size: 0.7rem; color: var(--paint); text-align: right; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td code { white-space: nowrap; }
+
+/* File tree */
+.tree { font-family: var(--mono); font-size: var(--s-1); line-height: 1.8; }
+.tree .note { color: var(--muted); }
+.tree .hl { color: var(--accent); font-weight: 600; }
+
+/* Errors */
+.err { display: grid; gap: 10px; }
+.err-item { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; display: grid; gap: 4px; }
+.err-item b { font-family: var(--mono); font-size: var(--s-1); color: var(--warn); font-weight: 600; }
+
+/* Checklist */
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; }
+.checks input { margin-top: 5px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.checks label { cursor: pointer; }
+
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+details summary { cursor: pointer; font-weight: 500; }
+details p { margin-top: 8px; color: var(--muted); }
+.qa { display: grid; gap: 8px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .stage-row { grid-template-columns: 1fr; gap: 4px; }
+}
+/* Session 4 diagrams */
+.navstack { position: relative; height: 170px; max-width: 360px; }
+.navstack .scr {
+  position: absolute; width: 190px; height: 120px; border-radius: 12px;
+  background: var(--paper); border: 1.5px solid var(--line); padding: 0; overflow: hidden;
+  font-size: var(--s-1);
+}
+.navstack .scr .bar { background: var(--accent); color: var(--paper); padding: 4px 10px; font-weight: 600; font-size: 0.75rem; }
+.navstack .scr .bd { padding: 8px 10px; color: var(--muted); font-family: var(--mono); font-size: 0.7rem; }
+.navstack .s1 { left: 0; top: 40px; }
+.navstack .s2 { left: 40px; top: 20px; }
+.navstack .s3 { left: 80px; top: 0; border: 1.5px dashed var(--paint); }
+.navstack .ops { position: absolute; left: 285px; top: 8px; display: grid; gap: 10px; font-family: var(--mono); font-size: 0.75rem; }
+.op-push { color: var(--ok); } .op-pop { color: var(--warn); }
+@media (max-width: 520px) { .navstack .ops { position: static; margin-top: 175px; } .navstack { height: auto; } }
+
+.flow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.phone { width: 150px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--paper); overflow: hidden; flex: none; }
+.phone .bar { background: var(--accent); color: var(--paper); padding: 4px 10px; font-weight: 600; font-size: 0.75rem; }
+.phone .bd { padding: 10px; display: grid; gap: 6px; font-size: 0.75rem; }
+.phone .row { border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.arrows { display: grid; gap: 10px; font-family: var(--mono); font-size: 0.72rem; flex: 1 1 160px; min-width: 0; }
+.arrows .fwd { color: var(--ok); } .arrows .back { color: var(--warn); }
+
+.timeline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-family: var(--mono); font-size: var(--s-1); }
+.chip { border: 1.5px dashed var(--paint); border-radius: 6px; padding: 4px 10px; background: var(--paper); }
+.chip small { display: block; color: var(--muted); font-size: 0.68rem; }
+.sep { color: var(--muted); }
+
+.field-mock { display: grid; gap: 4px; max-width: 320px; }
+.field-mock .box { border: 2px solid var(--warn); border-radius: 6px; padding: 10px 12px; font-size: var(--s-1); position: relative; }
+.field-mock .box .lbl { position: absolute; top: -9px; left: 10px; background: var(--paper); padding: 0 4px; font-size: 0.7rem; color: var(--warn); }
+.field-mock .msg { color: var(--warn); font-size: 0.75rem; padding-left: 12px; }
+.field-mock.ok .box { border-color: var(--ok); } .field-mock.ok .box .lbl { color: var(--ok); }
+
+/* Show => and != as typed, not as joined symbols */
+code, pre { font-variant-ligatures: none; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="label">Flutter course · Session 4 of 15</span>
+  <h1>Navigation <span>&amp;</span> Forms</h1>
+  <p class="lede">Until now every app you built had a single screen. Today you learn to move between screens, send data to a screen and get an answer back, and collect input from the user with forms that check what they type.</p>
+  <div class="goal">
+    <span class="label">By the end of today you can</span>
+    <p>Build a multi-screen app that passes data forward, receives results back, and uses a validated form to add new items.</p>
+  </div>
+</header>
+
+<section>
+  <h2>How to run today's apps</h2>
+  <p>In VS Code, open <b>Run and Debug</b> (<code>Cmd+Shift+D</code>), pick an app from the dropdown under <b>Session 4</b>, and press <b>F5</b>. It runs in debug mode, so the Widget Inspector and breakpoints work. From the terminal, use:</p>
+  <pre><code>flutter run -t lib/day4_demos/demo1_push_pop.dart
+flutter run -t lib/contact_book/main.dart</code></pre>
+  <p>Several demos print to the <b>Debug Console</b>. Keep it open today; it shows exactly when Flutter rebuilds a widget or disposes it.</p>
+</section>
+
+<section>
+  <h2>The concepts, in the order we cover them</h2>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo1</span><h3>Navigator push and pop</h3></div>
+    <p>The Navigator keeps screens in a <b>stack</b>, like a pile of plates. <code>push</code> puts a new screen on top. <code>pop</code> removes the top screen and shows the one underneath. The back arrow in the AppBar is just a <code>pop</code>.</p>
+    <div class="stage">
+      <div class="navstack" role="img" aria-label="Three screens stacked; the top one is the visible screen">
+        <div class="scr s1"><div class="bar">First screen</div><div class="bd">bottom of stack</div></div>
+        <div class="scr s2"><div class="bar">Second screen</div><div class="bd">pushed</div></div>
+        <div class="scr s3"><div class="bar">Third screen</div><div class="bd">on top = visible</div></div>
+        <div class="ops"><span class="op-push">push → adds on top</span><span class="op-pop">pop ← removes top</span></div>
+      </div>
+    </div>
+    <pre><code>Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) =&gt; <span class="k">const</span> SecondScreen()),
+);
+
+Navigator.pop(context);   <span class="c">// go back one screen</span></code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo2</span><h3>Passing data to a new screen</h3></div>
+    <p>A screen is just a widget, so you send it data through its <b>constructor</b>, the same way you passed a dish to <code>DishCard</code> last session.</p>
+    <div class="stage">
+      <div class="flow">
+        <div class="phone"><div class="bar">Products</div><div class="bd"><div class="row">Earbuds</div><div class="row"><b>Smart Watch</b> ←tap</div><div>Power Bank</div></div></div>
+        <div class="arrows"><span class="fwd">ProductDetailScreen(<br>&nbsp;&nbsp;product: product) →</span></div>
+        <div class="phone"><div class="bar">Smart Watch</div><div class="bd"><div><b>₹3499</b></div><div>Heart-rate tracking…</div></div></div>
+      </div>
+    </div>
+    <pre><code><span class="k">class</span> ProductDetailScreen <span class="k">extends</span> StatelessWidget {
+  <span class="k">const</span> ProductDetailScreen({super.key, <span class="k">required this</span>.product});
+  <span class="k">final</span> Product product;   <span class="c">// the data this screen needs</span>
+  ...
+}
+
+<span class="c">// on tap in the list:</span>
+Navigator.push(context, MaterialPageRoute(
+  builder: (context) =&gt; ProductDetailScreen(product: product),
+));</code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo3</span><h3>Returning a result from a screen</h3></div>
+    <p><code>Navigator.push</code> returns a <code>Future</code>. If you <code>await</code> it, your code waits until the next screen closes. That screen sends a value back with <code>Navigator.pop(context, value)</code>.</p>
+    <div class="stage">
+      <div class="flow">
+        <div class="phone"><div class="bar">Order</div><div class="bd"><div>Selected size: <b>L</b></div></div></div>
+        <div class="arrows">
+          <span class="fwd">await Navigator.push(…) →</span>
+          <span class="back">← Navigator.pop(context, 'L')</span>
+        </div>
+        <div class="phone"><div class="bar">Choose a size</div><div class="bd"><div class="row">S</div><div class="row">M</div><div class="row"><b>L</b> ←tap</div><div>XL</div></div></div>
+      </div>
+    </div>
+    <pre><code><span class="k">final</span> chosen = <span class="k">await</span> Navigator.push&lt;String&gt;(
+  context,
+  MaterialPageRoute(builder: (context) =&gt; <span class="k">const</span> SizeScreen()),
+);
+<span class="k">if</span> (!mounted) <span class="k">return</span>;        <span class="c">// the screen may be gone after an await</span>
+<span class="k">if</span> (chosen == <span class="k">null</span>) <span class="k">return</span>;   <span class="c">// user pressed back</span>
+setState(() =&gt; _size = chosen);</code></pre>
+    <ul class="points">
+      <li>If the user presses the back arrow, the result is <code>null</code>. Always handle that case.</li>
+      <li>After an <code>await</code>, check <code>mounted</code> before you use <code>context</code> or call <code>setState</code>.</li>
+    </ul>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo4</span><h3>Named routes</h3></div>
+    <p>Instead of building a <code>MaterialPageRoute</code> every time, give each screen a name in one place and navigate by name.</p>
+    <pre><code><span class="k">class</span> AppRoutes {
+  <span class="k">static const</span> home = <span class="k">'/'</span>;
+  <span class="k">static const</span> profile = <span class="k">'/profile'</span>;
+}
+
+MaterialApp(
+  initialRoute: AppRoutes.home,
+  routes: {
+    AppRoutes.home: (context) =&gt; <span class="k">const</span> HomeScreen(),
+    AppRoutes.profile: (context) =&gt; <span class="k">const</span> ProfileScreen(),
+  },
+)
+
+Navigator.pushNamed(context, AppRoutes.profile, arguments: <span class="k">'Priya'</span>);
+
+<span class="c">// inside ProfileScreen:</span>
+<span class="k">final</span> name = ModalRoute.of(context)!.settings.arguments <span class="k">as</span> String;</code></pre>
+    <ul class="points">
+      <li>Keep route names as constants. A typo then becomes a compile error instead of a crash.</li>
+      <li><code>arguments</code> has no type, so you have to cast it. For passing data, constructors are safer.</li>
+    </ul>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo5</span><h3>setState() and how rebuilds work</h3></div>
+    <p>Changing a variable does not change the screen. <code>setState</code> changes the value <b>and</b> tells Flutter to run <code>build()</code> again so the screen shows the new value.</p>
+    <pre><code><span class="c">// ❌ value changes, screen does not</span>
+_count++;
+
+<span class="c">// ✅ value changes and build() runs again</span>
+setState(() =&gt; _count++);</code></pre>
+    <p>In the demo, tap “+1 without setState” three times. Nothing changes on screen. Then tap “+1 with setState” and the number jumps by four. The console also shows that <code>const</code> widgets are not rebuilt.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo6</span><h3>StatefulWidget lifecycle: initState and dispose</h3></div>
+    <div class="stage">
+      <div class="timeline" aria-label="Lifecycle order">
+        <span class="chip">createState<small>once</small></span><span class="sep">→</span>
+        <span class="chip">initState<small>once · set up</small></span><span class="sep">→</span>
+        <span class="chip">build<small>many times</small></span><span class="sep">→</span>
+        <span class="chip">dispose<small>once · clean up</small></span>
+      </div>
+    </div>
+    <p>A StatefulWidget is split into two classes. The widget itself (<code>SecondsCounter</code>) only describes what to show and is recreated often. Its <b>State</b> object (<code>_SecondsCounterState</code>) holds the values that change, like <code>_seconds</code>, and stays alive while the widget is on screen. <code>createState()</code> is where Flutter makes that State object. You never call it yourself.</p>
+    <pre><code>@override
+State&lt;SecondsCounter&gt; createState() =&gt; _SecondsCounterState();</code></pre>
+    <p>In the demo, “Remove counter” destroys the State object. “Add counter” calls <code>createState()</code> again and makes a new one, which is why the count starts again from 0.</p>
+    <pre><code>@override
+<span class="k">void</span> initState() {
+  <span class="k">super</span>.initState();          <span class="c">// super FIRST</span>
+  _timer = Timer.periodic(...);  <span class="c">// start things here</span>
+}
+
+@override
+<span class="k">void</span> dispose() {
+  _timer.cancel();              <span class="c">// stop things here</span>
+  <span class="k">super</span>.dispose();             <span class="c">// super LAST</span>
+}</code></pre>
+    <p>Anything you start in <code>initState</code> (timers, controllers, listeners) must be stopped in <code>dispose</code>. Otherwise it keeps running after the widget is gone, and you get <code>setState() called after dispose()</code>.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo7</span><h3>TextField and TextEditingController</h3></div>
+    <p>A <code>TextEditingController</code> lets your code read, change and clear the text in a <code>TextField</code>.</p>
+    <pre><code><span class="k">final</span> _nameController = TextEditingController();
+
+TextField(
+  controller: _nameController,
+  decoration: <span class="k">const</span> InputDecoration(labelText: <span class="k">'Your name'</span>),
+  keyboardType: TextInputType.name,
+)
+
+_nameController.text      <span class="c">// read what the user typed</span>
+_nameController.clear()    <span class="c">// empty the field</span>
+
+@override
+<span class="k">void</span> dispose() {
+  _nameController.dispose();   <span class="c">// always dispose controllers</span>
+  <span class="k">super</span>.dispose();
+}</code></pre>
+    <ul class="points">
+      <li><code>keyboardType</code> picks the keyboard: <code>phone</code>, <code>emailAddress</code>, <code>number</code>.</li>
+      <li><code>obscureText: true</code> hides a password.</li>
+      <li><code>onChanged</code> runs on every keystroke. <code>onSubmitted</code> runs when the user presses Done.</li>
+    </ul>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo8</span><h3>Form, TextFormField and validators</h3></div>
+    <p>A <code>Form</code> groups fields together. A <code>GlobalKey&lt;FormState&gt;</code> gives you a handle on the form, so one call can check every field.</p>
+    <div class="stage" style="display:flex;gap:20px;flex-wrap:wrap">
+      <div class="field-mock"><div class="box"><span class="lbl">Phone</span>98765</div><span class="msg">Phone number must be 10 digits</span></div>
+      <div class="field-mock ok"><div class="box"><span class="lbl">Email</span>ravi@example.com</div></div>
+    </div>
+    <pre><code><span class="k">final</span> _formKey = GlobalKey&lt;FormState&gt;();
+
+Form(
+  key: _formKey,
+  child: TextFormField(
+    validator: (value) {
+      <span class="k">if</span> (value == <span class="k">null</span> || value.isEmpty) <span class="k">return</span> <span class="k">'Enter a phone number'</span>;
+      <span class="k">if</span> (value.length != 10) <span class="k">return</span> <span class="k">'Phone number must be 10 digits'</span>;
+      <span class="k">return null</span>;   <span class="c">// null means valid</span>
+    },
+  ),
+)
+
+<span class="c">// on Save:</span>
+<span class="k">if</span> (_formKey.currentState!.validate()) {
+  <span class="c">// every field is valid</span>
+}</code></pre>
+    <ul class="points">
+      <li>A validator returns <code>null</code> when the value is fine, or an error message when it isn't.</li>
+      <li><code>validate()</code> runs every validator, shows the messages, and returns <code>true</code> only if all fields pass.</li>
+      <li><code>autovalidateMode: AutovalidateMode.onUserInteraction</code> re-checks a field while the user types.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The project: Contact Book App</h2>
+  <p>A contact list with three screens. The list shows every contact with an initials avatar. Tapping a contact opens its details. The “Add contact” button opens a form that checks the name, a 10-digit phone number and the email, then sends the new contact back to the list. The detail screen can also delete a contact by sending <code>true</code> back.</p>
+
+  <div class="stage">
+    <div class="flow">
+      <div class="phone"><div class="bar">Contacts (3)</div><div class="bd"><div class="row">Ananya Rao</div><div class="row">Karthik Reddy</div><div>Meera Iyer</div></div></div>
+      <div class="arrows">
+        <span class="fwd">tap → ContactDetailScreen(contact)</span>
+        <span class="back">← pop(context, true) on delete</span>
+        <span class="fwd">“Add contact” → AddContactScreen</span>
+        <span class="back">← pop(context, newContact)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage tree">
+<div>lib/contact_book/</div>
+<div>├─ <span class="hl">main.dart</span> <span class="note">· starts the app, sets the theme</span></div>
+<div>├─ <span class="hl">validators.dart</span> <span class="note">· name, phone and email checks</span></div>
+<div>├─ models/<span class="hl">contact.dart</span> <span class="note">· the Contact class</span></div>
+<div>├─ widgets/<span class="hl">contact_avatar.dart</span> <span class="note">· initials circle, used on 2 screens</span></div>
+<div>└─ screens/</div>
+<div>&nbsp;&nbsp;&nbsp;├─ <span class="hl">contact_list_screen.dart</span></div>
+<div>&nbsp;&nbsp;&nbsp;├─ <span class="hl">contact_detail_screen.dart</span></div>
+<div>&nbsp;&nbsp;&nbsp;└─ <span class="hl">add_contact_screen.dart</span></div>
+  </div>
+
+  <h3>Where each concept appears</h3>
+  <div class="table-wrap"><table>
+    <tr><th>File</th><th>What to look for</th></tr>
+    <tr><td><code>contact_list_screen.dart</code></td><td><code>await Navigator.push&lt;Contact&gt;</code>, the <code>mounted</code> check, <code>setState</code> to add or remove, a SnackBar, and an empty state when there are no contacts</td></tr>
+    <tr><td><code>contact_detail_screen.dart</code></td><td>Receives a <code>Contact</code> through its constructor. Delete calls <code>Navigator.pop(context, true)</code>.</td></tr>
+    <tr><td><code>add_contact_screen.dart</code></td><td><code>Form</code>, <code>GlobalKey&lt;FormState&gt;</code>, three controllers created and disposed, <code>validate()</code>, and <code>Navigator.pop(context, contact)</code></td></tr>
+    <tr><td><code>validators.dart</code></td><td>Validators as plain functions, so the form can use them and tests can check them</td></tr>
+    <tr><td><code>contact_avatar.dart</code></td><td>One small widget reused on two screens</td></tr>
+  </table></div>
+  <p>The project also has tests in <code>test/contact_book_test.dart</code>. Run <code>flutter test</code> to see them check the validators and the full add → open → delete flow.</p>
+</section>
+
+<section>
+  <h2>Errors you will see today</h2>
+  <div class="err">
+    <div class="err-item"><b>The number doesn't change on screen</b><span>You changed a variable without <code>setState</code>.</span></div>
+    <div class="err-item"><b>“setState() called after dispose()”</b><span>A timer or listener is still running after the widget was removed. Cancel it in <code>dispose</code>, and check <code>mounted</code> after every <code>await</code>.</span></div>
+    <div class="err-item"><b>“Null check operator used on a null value” at <code>currentState!</code></b><span>You forgot <code>key: _formKey</code> on the <code>Form</code>.</span></div>
+    <div class="err-item"><b>The result is always null</b><span>The screen called <code>Navigator.pop(context)</code> without a value, or the user pressed back.</span></div>
+    <div class="err-item"><b>“type 'Null' is not a subtype of type 'String'”</b><span>You opened a named route without <code>arguments</code>, but the screen casts them to a String.</span></div>
+    <div class="err-item"><b>“Navigator operation requested with a context that does not include a Navigator”</b><span>You used the <code>context</code> of the widget that builds <code>MaterialApp</code>. Navigate from a screen inside <code>home:</code> instead.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Practice task (in class)</h2>
+  <p>Build a 3-screen app about books, students or anything you like.</p>
+  <ul class="checks">
+    <li><input type="checkbox" id="p1"><label for="p1">A list screen built with <code>ListView.builder</code>.</label></li>
+    <li><input type="checkbox" id="p2"><label for="p2">Tapping an item opens a detail screen that receives the item through its constructor.</label></li>
+    <li><input type="checkbox" id="p3"><label for="p3">A “+” button opens a form screen. Every field has a validator.</label></li>
+    <li><input type="checkbox" id="p4"><label for="p4">Saving returns the new item with <code>Navigator.pop(context, item)</code>, and the list adds it with <code>setState</code>.</label></li>
+    <li><input type="checkbox" id="p5"><label for="p5">All controllers are disposed.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Homework: extend the Contact Book</h2>
+  <ul class="checks">
+    <li><input type="checkbox" id="h1"><label for="h1">Add an <b>Edit</b> button on the detail screen. It opens the form already filled in and returns the updated contact.</label></li>
+    <li><input type="checkbox" id="h2"><label for="h2">Add an optional <b>Company</b> field that is allowed to be empty.</label></li>
+    <li><input type="checkbox" id="h3"><label for="h3">Add a search <code>TextField</code> above the list that filters contacts as you type.</label></li>
+    <li><input type="checkbox" id="h4"><label for="h4">Switch the app to named routes with an <code>AppRoutes</code> class.</label></li>
+    <li><input type="checkbox" id="h5"><label for="h5">Commit your work and push it to your GitHub repo.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Check yourself</h2>
+  <div class="qa">
+    <details><summary>How does a screen send data back to the screen that opened it?</summary><p>It calls <code>Navigator.pop(context, value)</code>. The screen that opened it receives the value from <code>await Navigator.push(...)</code>.</p></details>
+    <details><summary>What does <code>await Navigator.push(...)</code> give you if the user presses back?</summary><p><code>null</code>. That's why you check for null before using the result.</p></details>
+    <details><summary>What happens if you change a variable without calling <code>setState</code>?</summary><p>The variable changes, but <code>build()</code> doesn't run, so the screen keeps showing the old value.</p></details>
+    <details><summary>Why must you dispose a <code>TextEditingController</code>?</summary><p>It holds resources and listeners. If you don't dispose it, it stays in memory after the screen is gone.</p></details>
+    <details><summary>What should a validator return when the value is valid?</summary><p><code>null</code>. Any String it returns is shown as the error message.</p></details>
+  </div>
+</section>
+
+<section>
+  <span class="label">Next session</span>
+  <p><b>Session 5 · State Management with Riverpod.</b> Why <code>setState</code> gets hard to manage as an app grows, and how Riverpod shares state between screens. You'll build a Pizza Order app.</p>
+</section>
+
+</div>
+
+</body>
+</html>

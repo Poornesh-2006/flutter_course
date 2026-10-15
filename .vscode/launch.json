@@ -1,0 +1,49 @@
+{
+  // Pick an app from the Run and Debug dropdown, then press F5.
+  // Each one runs in debug mode, so breakpoints and the Widget Inspector work.
+  "version": "0.2.0",
+  "configurations": [
+    // ---------- Session 7 · Local Storage ----------
+    // Fixed port: in Chrome, saved data belongs to one address (localhost:5050).
+    // A random port on every run would look like a new site with empty storage.
+    { "name": "S7 · Quotes App", "type": "dart", "request": "launch", "program": "lib/quotes_app/main.dart", "args": ["--web-port", "5050"], "presentation": { "group": "Session 7", "order": 0 } },
+    { "name": "S7 · Demo 1 · Saving Settings", "type": "dart", "request": "launch", "program": "lib/day7_demos/demo1_prefs_basics.dart", "args": ["--web-port", "5050"], "presentation": { "group": "Session 7", "order": 1 } },
+    { "name": "S7 · Demo 2 · Saving a List", "type": "dart", "request": "launch", "program": "lib/day7_demos/demo2_prefs_list.dart", "args": ["--web-port", "5050"], "presentation": { "group": "Session 7", "order": 2 } },
+    { "name": "S7 · Demo 3 · Storage + Riverpod", "type": "dart", "request": "launch", "program": "lib/day7_demos/demo3_prefs_riverpod.dart", "args": ["--web-port", "5050"], "presentation": { "group": "Session 7", "order": 3 } },
+
+    // ---------- Session 6 · Working with APIs ----------
+    { "name": "S6 · Joke App", "type": "dart", "request": "launch", "program": "lib/joke_app/main.dart", "presentation": { "group": "Session 6", "order": 0 } },
+    { "name": "S6 · Demo 1 · http Basics", "type": "dart", "request": "launch", "program": "lib/day6_demos/demo1_http_basics.dart", "presentation": { "group": "Session 6", "order": 1 } },
+    { "name": "S6 · Demo 2 · FutureBuilder", "type": "dart", "request": "launch", "program": "lib/day6_demos/demo2_future_builder.dart", "presentation": { "group": "Session 6", "order": 2 } },
+    { "name": "S6 · Demo 3 · FutureProvider", "type": "dart", "request": "launch", "program": "lib/day6_demos/demo3_future_provider.dart", "presentation": { "group": "Session 6", "order": 3 } },
+
+    // ---------- Session 5 · State Management with Riverpod ----------
+    { "name": "S5 · Pizza Order App", "type": "dart", "request": "launch", "program": "lib/pizza_order/main.dart", "presentation": { "group": "Session 5", "order": 0 } },
+    { "name": "S5 · Demo 1 · The setState Problem", "type": "dart", "request": "launch", "program": "lib/day5_demos/demo1_setstate_problem.dart", "presentation": { "group": "Session 5", "order": 1 } },
+    { "name": "S5 · Demo 2 · Provider Basics", "type": "dart", "request": "launch", "program": "lib/day5_demos/demo2_provider_basics.dart", "presentation": { "group": "Session 5", "order": 2 } },
+    { "name": "S5 · Demo 3 · StateProvider & watch vs read", "type": "dart", "request": "launch", "program": "lib/day5_demos/demo3_state_provider.dart", "presentation": { "group": "Session 5", "order": 3 } },
+    { "name": "S5 · Demo 4 · NotifierProvider", "type": "dart", "request": "launch", "program": "lib/day5_demos/demo4_notifier_provider.dart", "presentation": { "group": "Session 5", "order": 4 } },
+    { "name": "S5 · Demo 5 · Shared Across Screens", "type": "dart", "request": "launch", "program": "lib/day5_demos/demo5_shared_across_screens.dart", "presentation": { "group": "Session 5", "order": 5 } },
+
+    // ---------- Session 4 · Navigation & Forms ----------
+    { "name": "S4 · Contact Book App", "type": "dart", "request": "launch", "program": "lib/contact_book/main.dart", "presentation": { "group": "Session 4", "order": 0 } },
+    { "name": "S4 · Demo 1 · Push & Pop", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo1_push_pop.dart", "presentation": { "group": "Session 4", "order": 1 } },
+    { "name": "S4 · Demo 2 · Passing Data", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo2_pass_data.dart", "presentation": { "group": "Session 4", "order": 2 } },
+    { "name": "S4 · Demo 3 · Returning a Result", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo3_return_result.dart", "presentation": { "group": "Session 4", "order": 3 } },
+    { "name": "S4 · Demo 4 · Named Routes", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo4_named_routes.dart", "presentation": { "group": "Session 4", "order": 4 } },
+    { "name": "S4 · Demo 5 · setState", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo5_setstate.dart", "presentation": { "group": "Session 4", "order": 5 } },
+    { "name": "S4 · Demo 6 · Lifecycle", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo6_lifecycle.dart", "presentation": { "group": "Session 4", "order": 6 } },
+    { "name": "S4 · Demo 7 · TextField & Controller", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo7_textfield_controller.dart", "presentation": { "group": "Session 4", "order": 7 } },
+    { "name": "S4 · Demo 8 · Form Validation", "type": "dart", "request": "launch", "program": "lib/day4_demos/demo8_form_validation.dart", "presentation": { "group": "Session 4", "order": 8 } },
+
+    // ---------- Session 3 · Layouts & Styling ----------
+    { "name": "S3 · Restaurant Menu App", "type": "dart", "request": "launch", "program": "lib/main.dart", "presentation": { "group": "Session 3", "order": 0 } },
+    { "name": "S3 · Demo 1 · Padding & Alignment", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo1_padding_alignment.dart", "presentation": { "group": "Session 3", "order": 1 } },
+    { "name": "S3 · Demo 2 · Main & Cross Axis", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo2_main_cross_axis.dart", "presentation": { "group": "Session 3", "order": 2 } },
+    { "name": "S3 · Demo 3 · Expanded & Flexible", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo3_expanded_flexible.dart", "presentation": { "group": "Session 3", "order": 3 } },
+    { "name": "S3 · Demo 4 · ListView", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo4_listview.dart", "presentation": { "group": "Session 3", "order": 4 } },
+    { "name": "S3 · Demo 5 · GridView", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo5_gridview.dart", "presentation": { "group": "Session 3", "order": 5 } },
+    { "name": "S3 · Demo 6 · Stack & Positioned", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo6_stack_positioned.dart", "presentation": { "group": "Session 3", "order": 6 } },
+    { "name": "S3 · Demo 7 · Theme, Assets & Fonts", "type": "dart", "request": "launch", "program": "lib/day3_demos/demo7_theme_assets_fonts.dart", "presentation": { "group": "Session 3", "order": 7 } }
+  ]
+}

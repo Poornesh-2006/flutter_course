@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Paws &amp; Homes Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a design handoff sheet. Page chrome follows the viewer's theme; the phone artboards on the canvas
+   always use the fixed app palette (--app-*), exactly as the Flutter app will look. */
+:root {
+  /* page chrome */
+  --ground: #f2f3f0; --paper: #ffffff; --ink: #1d2421; --muted: #59645f; --line: #d9ded9;
+  --canvas: #e6e8e3; --canvas-dot: #cfd4ce; --pin: #d9480f; --pin-ink: #ffffff;
+  /* the app's own palette (never theme-switched) */
+  --app-ground: #F5F6F1; --app-surface: #FFFFFF; --app-ink: #1E2A26; --app-muted: #5F6B66;
+  --app-primary: #2F5D50; --app-on-primary: #FFFFFF; --app-primary-soft: #E3EEE9;
+  --app-accent: #F2A65A; --app-on-accent: #1E2A26; --app-error: #B3261E; --app-line: #DCE1DD;
+  --ph-apricot: #FBE3C8; --ph-sky: #DCE8F5; --ph-sage: #DDEBE4; --ph-rose: #F6DDE0;
+
+  --display: "Fredoka", "Avenir Next Rounded", "Trebuchet MS", sans-serif;
+  --body: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #121614; --paper: #1a201d; --ink: #e4e9e6; --muted: #9aa69f; --line: #2c3531;
+    --canvas: #0c0f0e; --canvas-dot: #222926; --pin: #ff7a45; --pin-ink: #1a0c05;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #121614; --paper: #1a201d; --ink: #e4e9e6; --muted: #9aa69f; --line: #2c3531;
+  --canvas: #0c0f0e; --canvas-dot: #222926; --pin: #ff7a45; --pin-ink: #1a0c05;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.6; padding-inline: 20px; padding-block: 0 72px; }
+.wrap { max-width: 1340px; margin-inline: auto; display: grid; gap: 56px; }
+.read { max-width: 760px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.15; text-wrap: balance; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 68ch; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--paper); border: 1px solid var(--line); padding: 0 5px; border-radius: 4px; }
+pre { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.6; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; color: var(--ink); }
+pre code { border: 0; padding: 0; background: none; }
+.label { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+section { display: grid; gap: 18px; }
+
+header { padding-block: 44px 0; display: grid; gap: 14px; }
+header h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); }
+header .lede { font-size: 1.08rem; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+
+/* ---------- Canvas ---------- */
+.canvas {
+  background-color: var(--canvas);
+  background-image: radial-gradient(var(--canvas-dot) 1px, transparent 1px);
+  background-size: 18px 18px;
+  border-radius: 16px; border: 1px solid var(--line);
+  overflow-x: auto; padding: 40px 36px 48px;
+}
+.boards { display: flex; gap: 72px; width: max-content; align-items: flex-start; }
+.board { display: grid; gap: 10px; }
+.board-name { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); display: flex; gap: 10px; }
+.board-name b { color: var(--ink); font-weight: 600; }
+
+/* ---------- Phone artboard (app palette only) ---------- */
+.phone {
+  width: 390px; height: 844px; position: relative; overflow: hidden;
+  background: var(--app-ground); color: var(--app-ink); font-family: var(--body);
+  border-radius: 44px; box-shadow: 0 0 0 10px #101413, 0 24px 60px rgba(0,0,0,.28);
+  font-size: 15px; line-height: 1.4;
+}
+.phone .notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 120px; height: 32px; background: #101413; border-radius: 20px; z-index: 3; }
+.phone .scr { position: absolute; inset: 0; padding: 62px 24px 0; display: flex; flex-direction: column; }
+.phone h1, .phone h2, .phone h3 { font-family: var(--display); color: var(--app-ink); }
+
+/* app components */
+.logo { width: 72px; height: 72px; border-radius: 22px; background: var(--app-primary); color: var(--app-on-primary); display: grid; place-items: center; }
+.logo svg { width: 38px; height: 38px; }
+.field { display: grid; gap: 6px; }
+.field .flabel { font-size: 13px; font-weight: 700; color: var(--app-ink); }
+.input { height: 52px; border-radius: 12px; background: var(--app-surface); border: 1.5px solid var(--app-line); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: var(--app-ink); font-size: 15px; }
+.input .ph { color: var(--app-muted); }
+.input svg { width: 20px; height: 20px; flex: none; color: var(--app-muted); }
+.input .grow { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.input.focus { border: 2px solid var(--app-primary); }
+.input.error { border: 2px solid var(--app-error); }
+.input.error svg.lead { color: var(--app-error); }
+.ferr { font-size: 12.5px; color: var(--app-error); font-weight: 600; display: flex; gap: 6px; align-items: center; }
+.ferr svg { width: 14px; height: 14px; flex: none; }
+.btn-primary { height: 54px; border-radius: 27px; background: var(--app-primary); color: var(--app-on-primary); font-family: var(--display); font-weight: 600; font-size: 17px; display: grid; place-items: center; border: 0; width: 100%; }
+.btn-outline { height: 54px; border-radius: 27px; background: transparent; color: var(--app-primary); border: 1.5px solid var(--app-primary); font-family: var(--display); font-weight: 600; font-size: 17px; display: grid; place-items: center; width: 100%; }
+.link { color: var(--app-primary); font-weight: 700; font-size: 14px; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--app-muted); font-size: 13px; }
+.or::before, .or::after { content: ""; height: 1px; flex: 1; background: var(--app-line); }
+.spinner { width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; }
+
+.home-top { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--ph-apricot); color: var(--app-ink); display: grid; place-items: center; font-family: var(--display); font-weight: 600; font-size: 16px; flex: none; }
+.icon-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--app-surface); border: 1px solid var(--app-line); display: grid; place-items: center; position: relative; flex: none; color: var(--app-ink); }
+.icon-btn svg { width: 22px; height: 22px; }
+.dot { position: absolute; top: 11px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: var(--app-accent); border: 2px solid var(--app-surface); }
+.banner { border-radius: 20px; background: var(--app-primary); color: var(--app-on-primary); padding: 18px 18px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; position: relative; overflow: hidden; }
+.banner h3 { color: var(--app-on-primary); font-size: 20px; }
+.banner p { font-size: 13px; opacity: .9; margin-top: 4px; }
+.banner .pill { margin-top: 12px; display: inline-block; background: var(--app-accent); color: var(--app-on-accent); border-radius: 16px; padding: 6px 14px; font-weight: 700; font-size: 13px; }
+.banner .paw-big { width: 92px; height: 92px; color: rgba(255,255,255,.14); }
+.chips { display: flex; gap: 8px; }
+.chip { flex: none; height: 40px; padding: 0 14px 0 6px; border-radius: 20px; background: var(--app-surface); border: 1px solid var(--app-line); display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; white-space: nowrap; color: var(--app-ink); }
+.chip .ci { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--app-primary-soft); color: var(--app-primary); }
+.chip .ci svg { width: 16px; height: 16px; }
+.chip.on { background: var(--app-primary); border-color: var(--app-primary); color: var(--app-on-primary); }
+.chip.on .ci { background: rgba(255,255,255,.18); color: var(--app-on-primary); }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; }
+.sec-head h3 { font-size: 19px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pet { background: var(--app-surface); border-radius: 18px; overflow: hidden; border: 1px solid var(--app-line); }
+.pet .photo { height: 128px; position: relative; display: grid; place-items: center; }
+.pet .photo svg.p { width: 46px; height: 46px; color: rgba(30,42,38,.28); }
+.pet .photo .cap { position: absolute; bottom: 6px; left: 8px; font-family: var(--mono); font-size: 9px; color: rgba(30,42,38,.5); }
+.pet .fav { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; border-radius: 50%; background: var(--app-surface); display: grid; place-items: center; color: var(--app-primary); }
+.pet .fav svg { width: 18px; height: 18px; }
+.pet .fav.on { color: var(--app-error); }
+.pet .tag { position: absolute; top: 8px; left: 8px; background: var(--app-accent); color: var(--app-on-accent); font-size: 11px; font-weight: 700; border-radius: 10px; padding: 2px 9px; }
+.pet .info { padding: 10px 12px 12px; display: grid; gap: 2px; }
+.pet .name { display: flex; justify-content: space-between; align-items: center; }
+.pet .name b { font-family: var(--display); font-weight: 600; font-size: 16px; }
+.pet .sex { font-size: 12px; font-weight: 700; color: var(--app-primary); background: var(--app-primary-soft); border-radius: 8px; padding: 0 7px; }
+.pet .sub { font-size: 12.5px; color: var(--app-muted); }
+.navbar { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: var(--app-surface); border-top: 1px solid var(--app-line); display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 8px 22px; }
+.nav-i { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11.5px; font-weight: 700; color: var(--app-muted); }
+.nav-i .ni { width: 56px; height: 30px; border-radius: 15px; display: grid; place-items: center; }
+.nav-i svg { width: 22px; height: 22px; }
+.nav-i.on { color: var(--app-primary); }
+.nav-i.on .ni { background: var(--app-primary-soft); }
+
+/* annotation pins */
+.pin { position: absolute; z-index: 5; width: 24px; height: 24px; border-radius: 50%; background: var(--pin); color: var(--pin-ink); font-family: var(--mono); font-size: 12px; font-weight: 600; display: grid; place-items: center; box-shadow: 0 0 0 3px rgba(255,255,255,.85); }
+.measure { position: absolute; z-index: 4; font-family: var(--mono); font-size: 10px; color: var(--pin); border: 1px dashed var(--pin); display: grid; place-items: center; pointer-events: none; }
+
+/* ---------- Spec content ---------- */
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px 28px; }
+.legend-item { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; }
+.legend-item .pin { position: static; box-shadow: none; }
+.legend-item b { display: block; }
+.legend-item span { color: var(--muted); font-size: 0.92rem; }
+.legend-item code { font-size: 0.82em; }
+
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.sw { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sw .chipc { height: 64px; border-bottom: 1px solid var(--line); }
+.sw .t { padding: 10px 12px; display: grid; gap: 2px; font-size: 0.85rem; }
+.sw .t b { font-size: 0.92rem; }
+.sw .t code { font-size: 0.74rem; justify-self: start; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td code { white-space: nowrap; }
+
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.comp { background: var(--app-ground); color: var(--app-ink); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 12px; align-content: start; }
+.comp .cl { font-family: var(--mono); font-size: 0.7rem; color: var(--app-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+.comp .state { font-family: var(--mono); font-size: 0.7rem; color: var(--app-muted); }
+.comp .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 5px; max-width: 70ch; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start; }
+.two > div { display: grid; gap: 12px; }
+
+:focus-visible { outline: 2px solid var(--pin); outline-offset: 2px; }
+
+/* Show => and != as typed, not as joined symbols */
+code, pre { font-variant-ligatures: none; }
+</style>
+
+<!-- Reusable inline icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-paw" viewBox="0 0 24 24"><g fill="currentColor"><ellipse cx="6" cy="10" rx="2.2" ry="2.8"/><ellipse cx="18" cy="10" rx="2.2" ry="2.8"/><ellipse cx="9.6" cy="5.6" rx="2.1" ry="2.7"/><ellipse cx="14.4" cy="5.6" rx="2.1" ry="2.7"/><path d="M12 11.5c-3 0-6 3.6-6 6.2 0 1.7 1.3 2.5 2.8 2.5 1.3 0 2.1-.6 3.2-.6s1.9.6 3.2.6c1.5 0 2.8-.8 2.8-2.5 0-2.6-3-6.2-6-6.2z"/></g></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></g></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.5v.01"/></g></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></g></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></symbol>
+    <symbol id="i-heart-f" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20h-5v-5.5H9V20H4z"/></g></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10.5A.5.5 0 0 1 6.5 20V4a.5.5 0 0 1 .5-.5z"/><path d="M9.5 12h5M9.5 15.5h5"/></g></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20.5c1.2-3.8 4.2-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></g></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><g fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></g></symbol>
+    <symbol id="i-dog" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9 4.5 6.5 4 11l2 1"/><path d="M17 9l2.5-2.5L20 11l-2 1"/><path d="M7 9c1-2 3-3 5-3s4 1 5 3v5a5 5 0 0 1-10 0z"/><path d="M10.5 15.5h3"/></g></symbol>
+    <symbol id="i-cat" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V8l3.5 3h7L19 8v11z"/><path d="M9.5 15h.01M14.5 15h.01"/></g></symbol>
+    <symbol id="i-bird" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13c3 0 5-2 6-5 1.5-3.5 6-3.5 7 0l3 1-3 1.5c0 5-3.5 8.5-8.5 8.5H4c2-1 3-3 3-5"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header class="read">
+  <span class="label">Flutter course · Screen design for the Paws &amp; Homes practice project</span>
+  <h1>Paws &amp; Homes: Login and Home</h1>
+  <p class="lede">Two screens to build in Flutter, with a third artboard showing the login's error state. Match the colors, fonts, sizes and spacing below. Every value is given in Flutter units (logical pixels).</p>
+  <div class="meta"><span>Frame <b>390 × 844</b> (iPhone 14 / Pixel 7 size)</span><span>Fonts <b>Fredoka</b> + <b>Nunito Sans</b></span><span>Grid <b>4 px</b></span><span>Side padding <b>24</b></span></div>
+</header>
+
+<section>
+  <div class="canvas" role="region" aria-label="Design canvas with three phone screens" tabindex="0">
+    <div class="boards">
+
+      <!-- ================= LOGIN ================= -->
+      <div class="board">
+        <div class="board-name"><b>01 · Login</b><span>AppRoutes.login · '/login'</span></div>
+        <div class="phone">
+          <div class="notch"></div>
+          <span class="pin" style="top:96px;left:150px">1</span>
+          <span class="pin" style="top:206px;left:4px">2</span>
+          <span class="pin" style="top:300px;left:4px">3</span>
+          <span class="pin" style="top:418px;left:300px">4</span>
+          <span class="pin" style="top:530px;left:4px">5</span>
+          <span class="pin" style="top:610px;left:4px">6</span>
+          <span class="measure" style="top:300px;left:0;width:24px;height:16px">24</span>
+          <div class="scr" style="padding-top:96px;gap:0">
+            <div class="logo"><svg><use href="#i-paw"/></svg></div>
+            <h1 style="font-size:30px;font-weight:600;margin-top:28px">Welcome back</h1>
+            <p style="color:var(--app-muted);font-size:15px;margin-top:6px">Log in to meet pets waiting for a home.</p>
+            <div style="display:grid;gap:18px;margin-top:32px">
+              <div class="field">
+                <span class="flabel">Email</span>
+                <div class="input"><svg class="lead"><use href="#i-mail"/></svg><span class="grow ph">name@example.com</span></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Password</span>
+                <div class="input focus"><svg class="lead" style="color:var(--app-primary)"><use href="#i-lock"/></svg><span class="grow">••••••••</span><svg><use href="#i-eye"/></svg></div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:12px"><span class="link">Forgot password?</span></div>
+            <div style="margin-top:24px"><div class="btn-primary">Log in</div></div>
+            <div class="or" style="margin-top:22px">or</div>
+            <div style="margin-top:22px"><div class="btn-outline">Create an account</div></div>
+            <p style="margin-top:auto;margin-bottom:34px;text-align:center;font-size:12.5px;color:var(--app-muted)">By continuing you agree to the Terms and Privacy Policy.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= LOGIN · ERRORS ================= -->
+      <div class="board">
+        <div class="board-name"><b>02 · Login, errors + loading</b><span>after tapping Log in</span></div>
+        <div class="phone">
+          <div class="notch"></div>
+          <span class="pin" style="top:372px;left:4px">7</span>
+          <span class="pin" style="top:560px;left:4px">8</span>
+          <div class="scr" style="padding-top:96px;gap:0">
+            <div class="logo"><svg><use href="#i-paw"/></svg></div>
+            <h1 style="font-size:30px;font-weight:600;margin-top:28px">Welcome back</h1>
+            <p style="color:var(--app-muted);font-size:15px;margin-top:6px">Log in to meet pets waiting for a home.</p>
+            <div style="display:grid;gap:18px;margin-top:32px">
+              <div class="field">
+                <span class="flabel">Email</span>
+                <div class="input error"><svg class="lead"><use href="#i-mail"/></svg><span class="grow">ananya@gmail</span></div>
+                <span class="ferr"><svg><use href="#i-alert"/></svg>Enter a valid email, like name@example.com</span>
+              </div>
+              <div class="field">
+                <span class="flabel">Password</span>
+                <div class="input error"><svg class="lead"><use href="#i-lock"/></svg><span class="grow">•••••</span><svg><use href="#i-eye"/></svg></div>
+                <span class="ferr"><svg><use href="#i-alert"/></svg>Password must be at least 8 characters</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:12px"><span class="link">Forgot password?</span></div>
+            <div style="margin-top:24px"><div class="btn-primary" style="opacity:.9"><span class="spinner" aria-label="Loading"></span></div></div>
+            <p style="margin-top:8px;text-align:center;font-size:12.5px;color:var(--app-muted)">Loading state: shown for 1.5 s once both fields are valid</p>
+            <div class="or" style="margin-top:14px">or</div>
+            <div style="margin-top:22px"><div class="btn-outline">Create an account</div></div>
+            <p style="margin-top:auto;margin-bottom:34px;text-align:center;font-size:12.5px;color:var(--app-muted)">By continuing you agree to the Terms and Privacy Policy.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HOME ================= -->
+      <div class="board">
+        <div class="board-name"><b>03 · Home</b><span>AppRoutes.home · '/'</span></div>
+        <div class="phone">
+          <div class="notch"></div>
+          <span class="pin" style="top:70px;left:4px">9</span>
+          <span class="pin" style="top:140px;left:4px">10</span>
+          <span class="pin" style="top:206px;left:4px">11</span>
+          <span class="pin" style="top:356px;left:4px">12</span>
+          <span class="pin" style="top:470px;left:200px">13</span>
+          <span class="pin" style="top:770px;left:4px">14</span>
+          <div class="scr" style="gap:18px;padding-top:62px">
+            <div class="home-top">
+              <div class="avatar">AR</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;color:var(--app-muted)">Hello, Ananya</div>
+                <div style="font-family:var(--display);font-weight:600;font-size:21px;line-height:1.2">Find your new friend</div>
+              </div>
+              <div class="icon-btn" aria-label="Notifications"><svg><use href="#i-bell"/></svg><span class="dot"></span></div>
+            </div>
+            <div class="input"><svg><use href="#i-search"/></svg><span class="grow ph">Search by name or breed</span></div>
+            <div class="banner">
+              <div>
+                <h3>Adopt, don't shop</h3>
+                <p>Every pet here is vaccinated and ready for a home.</p>
+                <span class="pill">See how it works</span>
+              </div>
+              <svg class="paw-big"><use href="#i-paw"/></svg>
+            </div>
+            <div class="chips">
+              <span class="chip on"><span class="ci"><svg><use href="#i-grid"/></svg></span>All</span>
+              <span class="chip"><span class="ci"><svg><use href="#i-dog"/></svg></span>Dogs</span>
+              <span class="chip"><span class="ci"><svg><use href="#i-cat"/></svg></span>Cats</span>
+              <span class="chip"><span class="ci"><svg><use href="#i-bird"/></svg></span>Birds</span>
+            </div>
+            <div class="sec-head"><h3>Pets near you</h3><span class="link">See all</span></div>
+            <div class="grid2">
+              <div class="pet">
+                <div class="photo" style="background:var(--ph-apricot)"><svg class="p"><use href="#i-dog"/></svg><span class="cap">photo</span><span class="tag">New</span><span class="fav"><svg><use href="#i-heart"/></svg></span></div>
+                <div class="info"><div class="name"><b>Bruno</b><span class="sex">M</span></div><span class="sub">Labrador · 2 yrs</span></div>
+              </div>
+              <div class="pet">
+                <div class="photo" style="background:var(--ph-sky)"><svg class="p"><use href="#i-cat"/></svg><span class="cap">photo</span><span class="fav on"><svg><use href="#i-heart-f"/></svg></span></div>
+                <div class="info"><div class="name"><b>Coco</b><span class="sex">F</span></div><span class="sub">Persian · 1 yr</span></div>
+              </div>
+              <div class="pet">
+                <div class="photo" style="background:var(--ph-sage)"><svg class="p"><use href="#i-dog"/></svg><span class="cap">photo</span><span class="fav"><svg><use href="#i-heart"/></svg></span></div>
+                <div class="info"><div class="name"><b>Max</b><span class="sex">M</span></div><span class="sub">Indie · 4 yrs</span></div>
+              </div>
+              <div class="pet">
+                <div class="photo" style="background:var(--ph-rose)"><svg class="p"><use href="#i-bird"/></svg><span class="cap">photo</span><span class="tag">New</span><span class="fav"><svg><use href="#i-heart"/></svg></span></div>
+                <div class="info"><div class="name"><b>Kiwi</b><span class="sex">F</span></div><span class="sub">Budgie · 1 yr</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="navbar">
+            <div class="nav-i on"><span class="ni"><svg><use href="#i-home"/></svg></span>Home</div>
+            <div class="nav-i"><span class="ni"><svg><use href="#i-heart"/></svg></span>Favourites</div>
+            <div class="nav-i"><span class="ni"><svg><use href="#i-doc"/></svg></span>Applications</div>
+            <div class="nav-i"><span class="ni"><svg><use href="#i-user"/></svg></span>Profile</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Spec notes</h2>
+  <p>The numbers match the orange pins on the canvas.</p>
+  <div class="legend">
+    <div class="legend-item"><span class="pin">1</span><div><b>Logo</b><span>72 × 72 box, radius 22, primary fill, white paw icon 38. Starts 96 from the top of the screen (inside <code>SafeArea</code> that's about 40 below the status bar).</span></div></div>
+    <div class="legend-item"><span class="pin">2</span><div><b>Title and subtitle</b><span>“Welcome back”: Display 30 / SemiBold, 28 below the logo. Subtitle: Body 15, muted, 6 below.</span></div></div>
+    <div class="legend-item"><span class="pin">3</span><div><b>Text fields</b><span>Label 13 Bold, 6 above the box. Box height 52, radius 12, border 1.5 line color, prefix icon 20. Fields are 18 apart. Side padding 24 on the whole screen.</span></div></div>
+    <div class="legend-item"><span class="pin">4</span><div><b>Focused field and password toggle</b><span>Focused border 2 px primary, prefix icon turns primary. The eye icon toggles <code>obscureText</code>.</span></div></div>
+    <div class="legend-item"><span class="pin">5</span><div><b>Primary button</b><span>Full width, height 54, fully rounded (radius 27), primary fill, Display 17 SemiBold. 24 below “Forgot password?”.</span></div></div>
+    <div class="legend-item"><span class="pin">6</span><div><b>Divider and secondary button</b><span>“or” with lines either side, 22 above and below. Outlined button: same size, 1.5 px primary border, primary text.</span></div></div>
+    <div class="legend-item"><span class="pin">7</span><div><b>Error state</b><span>Border 2 px error red, prefix icon red. Message under the field: 12.5 Bold, error red, with an alert icon 14. Use the exact messages shown.</span></div></div>
+    <div class="legend-item"><span class="pin">8</span><div><b>Loading state</b><span>When both fields are valid: disable the button, show a white 22 px spinner inside it for 1.5 s (<code>Future.delayed</code>), then go to Home.</span></div></div>
+    <div class="legend-item"><span class="pin">9</span><div><b>Greeting row</b><span>Avatar 46 circle with initials. “Hello, Ananya” Body 13 muted; “Find your new friend” Display 21. Notification button 46 circle, white, 1 px border, accent dot 9.</span></div></div>
+    <div class="legend-item"><span class="pin">10</span><div><b>Search field</b><span>Same style as the login fields, without a label. Optional for this practice: filtering by name is a bonus.</span></div></div>
+    <div class="legend-item"><span class="pin">11</span><div><b>Banner</b><span>Radius 20, primary fill, padding 18. Title Display 20 white, body 13. Pill button: accent fill, dark text 13 Bold, radius 16. Large paw at 14% white in a <code>Stack</code>.</span></div></div>
+    <div class="legend-item"><span class="pin">12</span><div><b>Category chips</b><span>Height 40, radius 20, 8 apart, horizontal scroll. Icon in a 28 circle. Selected: primary fill, white text. Unselected: white fill, 1 px line border.</span></div></div>
+    <div class="legend-item"><span class="pin">13</span><div><b>Pet cards</b><span>2-column <code>GridView.builder</code>, spacing 14. Card radius 18, 1 px border. Photo 128 tall with a <code>Stack</code>: “New” tag top-left, heart button 34 top-right (filled red when favourite). Name Display 16, gender pill, breed and age Body 12.5 muted.</span></div></div>
+    <div class="legend-item"><span class="pin">14</span><div><b>Bottom navigation</b><span>Material 3 <code>NavigationBar</code>, white, 4 destinations. Selected icon sits in a primary-soft pill. Only Home needs to work for this practice.</span></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Colors</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chipc" style="background:var(--app-primary)"></div><div class="t"><b>Primary</b><span>Buttons, selected chip, banner</span><code>Color(0xFF2F5D50)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-primary-soft)"></div><div class="t"><b>Primary soft</b><span>Icon circles, nav pill, gender pill</span><code>Color(0xFFE3EEE9)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-accent)"></div><div class="t"><b>Accent</b><span>“New” tag, banner pill, notification dot</span><code>Color(0xFFF2A65A)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-ground)"></div><div class="t"><b>Background</b><span>Scaffold background</span><code>Color(0xFFF5F6F1)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-surface)"></div><div class="t"><b>Surface</b><span>Fields, cards, nav bar</span><code>Color(0xFFFFFFFF)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-ink)"></div><div class="t"><b>Text</b><span>Headings and body</span><code>Color(0xFF1E2A26)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-muted)"></div><div class="t"><b>Muted text</b><span>Subtitles, placeholders, icons</span><code>Color(0xFF5F6B66)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-line)"></div><div class="t"><b>Line</b><span>Borders and dividers</span><code>Color(0xFFDCE1DD)</code></div></div>
+    <div class="sw"><div class="chipc" style="background:var(--app-error)"></div><div class="t"><b>Error</b><span>Field errors, filled heart</span><code>Color(0xFFB3261E)</code></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Typography</h2>
+  <p>Download <b>Fredoka</b> (SemiBold 600) and <b>Nunito Sans</b> (Regular 400, Bold 700) from Google Fonts, put the .ttf files in <code>assets/fonts/</code> and register them in <code>pubspec.yaml</code>, as in Session 3.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Style</th><th>Font</th><th>Size</th><th>Weight</th><th>Flutter textTheme</th><th>Used for</th></tr>
+    <tr><td style="font-family:var(--display);font-weight:600;font-size:22px">Display</td><td>Fredoka</td><td class="num">30</td><td class="num">600</td><td><code>headlineMedium</code></td><td>“Welcome back”</td></tr>
+    <tr><td style="font-family:var(--display);font-weight:600;font-size:19px">Title</td><td>Fredoka</td><td class="num">21 / 20 / 19</td><td class="num">600</td><td><code>titleLarge</code></td><td>Greeting, banner, section headings</td></tr>
+    <tr><td style="font-family:var(--display);font-weight:600;font-size:17px">Button</td><td>Fredoka</td><td class="num">17</td><td class="num">600</td><td><code>labelLarge</code></td><td>Primary and outlined buttons</td></tr>
+    <tr><td style="font-family:var(--display);font-weight:600;font-size:16px">Card name</td><td>Fredoka</td><td class="num">16</td><td class="num">600</td><td><code>titleMedium</code></td><td>Pet name</td></tr>
+    <tr><td style="font-size:15px">Body</td><td>Nunito Sans</td><td class="num">15</td><td class="num">400</td><td><code>bodyLarge</code></td><td>Subtitle, field text</td></tr>
+    <tr><td style="font-size:13px;font-weight:700">Label</td><td>Nunito Sans</td><td class="num">13</td><td class="num">700</td><td><code>labelMedium</code></td><td>Field labels, chips, links</td></tr>
+    <tr><td style="font-size:12.5px">Small</td><td>Nunito Sans</td><td class="num">12.5</td><td class="num">400 / 700</td><td><code>bodySmall</code></td><td>Breed and age, errors, terms</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Spacing and corners</h2>
+  <div class="two">
+    <div>
+      <h3>Spacing scale</h3>
+      <div class="table-wrap"><table>
+        <tr><th>Value</th><th>Where</th></tr>
+        <tr><td class="num">6</td><td>Field label to box, title to subtitle</td></tr>
+        <tr><td class="num">8</td><td>Between chips</td></tr>
+        <tr><td class="num">12</td><td>Inside the greeting row, field to “Forgot password?”</td></tr>
+        <tr><td class="num">14</td><td>Between pet cards</td></tr>
+        <tr><td class="num">18</td><td>Between fields, between Home sections</td></tr>
+        <tr><td class="num">24</td><td>Screen side padding, above the primary button</td></tr>
+        <tr><td class="num">28 / 32</td><td>Logo to title / subtitle to first field</td></tr>
+      </table></div>
+    </div>
+    <div>
+      <h3>Corner radius</h3>
+      <div class="table-wrap"><table>
+        <tr><th>Radius</th><th>Where</th></tr>
+        <tr><td class="num">12</td><td>Text fields</td></tr>
+        <tr><td class="num">18</td><td>Pet cards</td></tr>
+        <tr><td class="num">20</td><td>Banner, chips</td></tr>
+        <tr><td class="num">22</td><td>Logo</td></tr>
+        <tr><td class="num">27 (stadium)</td><td>Primary and outlined buttons</td></tr>
+        <tr><td class="num">circle</td><td>Avatar, icon buttons, heart button</td></tr>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Components and states</h2>
+  <div class="comp-grid">
+    <div class="comp">
+      <span class="cl">Text field</span>
+      <span class="state">default</span>
+      <div class="input"><svg><use href="#i-mail"/></svg><span class="grow ph">name@example.com</span></div>
+      <span class="state">focused</span>
+      <div class="input focus"><svg style="color:var(--app-primary)"><use href="#i-mail"/></svg><span class="grow">ananya.rao@</span></div>
+      <span class="state">error</span>
+      <div class="input error"><svg><use href="#i-mail"/></svg><span class="grow">ananya@gmail</span></div>
+      <span class="ferr"><svg><use href="#i-alert"/></svg>Enter a valid email, like name@example.com</span>
+    </div>
+    <div class="comp">
+      <span class="cl">Buttons</span>
+      <span class="state">primary</span>
+      <div class="btn-primary">Log in</div>
+      <span class="state">primary, loading (disabled)</span>
+      <div class="btn-primary" style="opacity:.9"><span class="spinner"></span></div>
+      <span class="state">outlined</span>
+      <div class="btn-outline">Create an account</div>
+    </div>
+    <div class="comp">
+      <span class="cl">Chips and pet card</span>
+      <span class="state">selected · unselected</span>
+      <div class="row">
+        <span class="chip on"><span class="ci"><svg><use href="#i-grid"/></svg></span>All</span>
+        <span class="chip"><span class="ci"><svg><use href="#i-cat"/></svg></span>Cats</span>
+      </div>
+      <span class="state">pet card, favourite on</span>
+      <div class="pet" style="max-width:170px">
+        <div class="photo" style="background:var(--ph-sky)"><svg class="p"><use href="#i-cat"/></svg><span class="cap">photo</span><span class="fav on"><svg><use href="#i-heart-f"/></svg></span></div>
+        <div class="info"><div class="name"><b>Coco</b><span class="sex">F</span></div><span class="sub">Persian · 1 yr</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="read">
+  <h2>How the screens behave</h2>
+  <h3>Login</h3>
+  <ul class="points">
+    <li>Use a <code>Form</code> with <code>GlobalKey&lt;FormState&gt;</code>. Email must be a valid format. Password must be at least 8 characters.</li>
+    <li>The eye icon shows and hides the password with <code>obscureText</code> and <code>setState</code>.</li>
+    <li>When both fields are valid, show the loading spinner for 1.5 seconds, then open Home with <code>Navigator.pushReplacementNamed(context, AppRoutes.home)</code>. <code>pushReplacementNamed</code> removes the login screen, so the back button doesn't return to it.</li>
+    <li>“Forgot password?” and “Create an account” can show a SnackBar saying “Coming soon” for now.</li>
+    <li>There's no real account check yet. Real sign-in with Firebase comes in Session 8, and this same screen will be reused.</li>
+  </ul>
+  <h3>Home</h3>
+  <ul class="points">
+    <li>The greeting shows the part of the email before <code>@</code>, with a capital first letter. Send it to Home as the route's <code>arguments</code>, or keep it in a Riverpod provider if you've done Session 5.</li>
+    <li>Category chips filter the grid. The heart toggles a favourite. Keep both in Riverpod providers if you've done Session 5.</li>
+    <li>Tapping a pet card opens the Pet detail screen from the Paws &amp; Homes brief.</li>
+    <li>Wrap the body in <code>SafeArea</code> and make it scrollable, so nothing overflows on a small phone or with large text.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Theme starter</h2>
+  <p>Put this in <code>lib/theme.dart</code>. Every color and font on the screens should come from here, never from <code>Colors.xxx</code> in a widget.</p>
+  <pre><code>import 'package:flutter/material.dart';
+
+const _primary = Color(0xFF2F5D50);
+const _ink = Color(0xFF1E2A26);
+const _line = Color(0xFFDCE1DD);
+
+ThemeData buildPawsTheme() {
+  final colors = ColorScheme.fromSeed(seedColor: _primary).copyWith(
+    primary: _primary,
+    onPrimary: Colors.white,
+    primaryContainer: const Color(0xFFE3EEE9),
+    secondary: const Color(0xFFF2A65A),   // accent
+    onSecondary: _ink,
+    surface: Colors.white,
+    onSurface: _ink,
+    onSurfaceVariant: const Color(0xFF5F6B66), // muted text
+    outlineVariant: _line,
+    error: const Color(0xFFB3261E),
+  );
+
+  OutlineInputBorder border(Color c, double w) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: c, width: w),
+      );
+
+  return ThemeData(
+    colorScheme: colors,
+    scaffoldBackgroundColor: const Color(0xFFF5F6F1),
+    fontFamily: 'NunitoSans',
+    textTheme: const TextTheme(
+      headlineMedium: TextStyle(fontFamily: 'Fredoka', fontSize: 30, fontWeight: FontWeight.w600),
+      titleLarge: TextStyle(fontFamily: 'Fredoka', fontSize: 21, fontWeight: FontWeight.w600),
+      titleMedium: TextStyle(fontFamily: 'Fredoka', fontSize: 16, fontWeight: FontWeight.w600),
+      labelLarge: TextStyle(fontFamily: 'Fredoka', fontSize: 17, fontWeight: FontWeight.w600),
+      bodyLarge: TextStyle(fontSize: 15),
+      labelMedium: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+      bodySmall: TextStyle(fontSize: 12.5),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      enabledBorder: border(_line, 1.5),
+      focusedBorder: border(_primary, 2),
+      errorBorder: border(const Color(0xFFB3261E), 2),
+      focusedErrorBorder: border(const Color(0xFFB3261E), 2),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(54),
+        shape: const StadiumBorder(),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(54),
+        shape: const StadiumBorder(),
+        side: const BorderSide(color: _primary, width: 1.5),
+      ),
+    ),
+  );
+}</code></pre>
+  <p>Register the fonts with these family names in <code>pubspec.yaml</code>:</p>
+  <pre><code>  fonts:
+    - family: Fredoka
+      fonts:
+        - asset: assets/fonts/Fredoka-SemiBold.ttf
+          weight: 600
+    - family: NunitoSans
+      fonts:
+        - asset: assets/fonts/NunitoSans-Regular.ttf
+        - asset: assets/fonts/NunitoSans-Bold.ttf
+          weight: 700</code></pre>
+</section>
+
+</div>
+
+</body>
+</html>

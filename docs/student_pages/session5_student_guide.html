@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Session 5 · Riverpod</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: same reading column and Debug Paint styling as Session 3, plus widget-tree comparisons showing where state lives */
+:root {
+  --ground: #f5f8fa;
+  --paper: #ffffff;
+  --ink: #14212b;
+  --muted: #566672;
+  --line: #d3dde4;
+  --accent: #0a6fb8;
+  --accent-soft: #e2f0fa;
+  --paint: #11a3a3;          /* Debug Paint cyan for outlines */
+  --warn: #b5450b;
+  --warn-soft: #fbeee6;
+  --ok: #1f7a3d;
+  --code-bg: #eef3f6;
+  --box1: #e86a4a; --box2: #2f9e5f; --box3: #3478c6;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --s-1: 0.8125rem; --s0: 1rem; --s1: 1.25rem; --s2: 1.6rem; --s3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+    --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+    --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+    --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+  --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+  --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+  --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: var(--s0); line-height: 1.65;
+  padding-inline: 20px; padding-block: 0 72px;
+}
+.wrap { max-width: 760px; margin-inline: auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: var(--s2); font-weight: 800; }
+h3 { font-size: var(--s1); font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre {
+  margin: 0; font-family: var(--mono); font-size: var(--s-1); line-height: 1.6;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; color: var(--ink);
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+.k { color: var(--accent); font-weight: 600; }
+.c { color: var(--muted); }
+.label {
+  font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--paint); font-weight: 600;
+}
+section { display: grid; gap: 18px; }
+
+/* Header */
+header { padding-block: 48px 0; display: grid; gap: 16px; }
+header h1 { font-size: clamp(2.2rem, 7vw, var(--s3)); font-weight: 800; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.goal {
+  border: 1.5px dashed var(--paint); border-radius: 10px; padding: 16px 18px;
+  background: var(--paper); display: grid; gap: 6px;
+}
+
+/* Concept blocks */
+.concept { border-top: 1px solid var(--line); padding-top: 28px; display: grid; gap: 14px; }
+.concept-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.demo-num {
+  font-family: var(--mono); font-size: var(--s-1); color: var(--paint);
+  border: 1.5px dashed var(--paint); border-radius: 6px; padding: 0 7px;
+}
+.run { font-family: var(--mono); font-size: var(--s-1); color: var(--muted); }
+.run b { color: var(--ink); font-weight: 600; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 65ch; }
+
+/* Mini layouts drawn like Debug Paint */
+.stage {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: grid; gap: 12px;
+}
+.stage-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.stage-row .cap { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.track {
+  outline: 1.5px dashed var(--paint); outline-offset: -1px; min-height: 56px;
+  display: flex; align-items: center; padding: 4px;
+}
+.b { width: 30px; flex: none; border-radius: 3px; }
+.b1 { background: var(--box1); height: 22px; }
+.b2 { background: var(--box2); height: 40px; }
+.b3 { background: var(--box3); height: 30px; }
+.box-label { color: #fff; font-family: var(--mono); font-size: 0.7rem; display: grid; place-items: center; height: 40px; border-radius: 3px; }
+
+.boxmodel { display: flex; gap: 16px; flex-wrap: wrap; }
+.bm { flex: 1 1 200px; display: grid; gap: 6px; }
+.bm-outer { outline: 1.5px dashed var(--muted); padding: 18px; position: relative; }
+.bm-box { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.bm-pad { padding: 18px; }
+.bm-child { background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 0.72rem; padding: 4px 8px; }
+
+.stack-demo { position: relative; height: 130px; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(135deg, var(--box1), var(--box3)); }
+.stack-demo .badge { position: absolute; top: 10px; left: 10px; background: var(--paper); color: var(--ink);
+  font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+.stack-demo .heart { position: absolute; bottom: 10px; right: 12px; color: #fff; font-size: 1.3rem; }
+.stack-demo .pos { position: absolute; font-family: var(--mono); font-size: 0.68rem; color: #fff; opacity: .85; }
+
+.grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid-demo div { height: 44px; border-radius: 6px; outline: 1.5px dashed var(--paint); outline-offset: -1px;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+.list-demo { display: grid; gap: 0; outline: 1.5px dashed var(--paint); outline-offset: -1px; max-height: 150px; overflow: hidden; position: relative; }
+.list-demo div { padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: var(--s-1); display: flex; justify-content: space-between; }
+.list-demo div span { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; }
+.list-demo::after { content: "rows 10 – 999 not built yet"; position: absolute; inset: auto 0 0 0; padding: 6px 12px;
+  background: linear-gradient(transparent, var(--paper) 55%); font-family: var(--mono); font-size: 0.7rem; color: var(--paint); text-align: right; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td code { white-space: nowrap; }
+
+/* File tree */
+.tree { font-family: var(--mono); font-size: var(--s-1); line-height: 1.8; }
+.tree .note { color: var(--muted); }
+.tree .hl { color: var(--accent); font-weight: 600; }
+
+/* Errors */
+.err { display: grid; gap: 10px; }
+.err-item { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; display: grid; gap: 4px; }
+.err-item b { font-family: var(--mono); font-size: var(--s-1); color: var(--warn); font-weight: 600; }
+
+/* Checklist */
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; }
+.checks input { margin-top: 5px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.checks label { cursor: pointer; }
+
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+details summary { cursor: pointer; font-weight: 500; }
+details p { margin-top: 8px; color: var(--muted); }
+.qa { display: grid; gap: 8px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .stage-row { grid-template-columns: 1fr; gap: 4px; }
+}
+/* Session 5 diagrams */
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.tree-diag { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.tree-diag h4 { margin: 0; font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.node { font-family: var(--mono); font-size: 0.75rem; border: 1.5px solid var(--line); border-radius: 6px; padding: 5px 8px; background: var(--ground); }
+.node.holder { border-color: var(--warn); }
+.node.store { border: 1.5px dashed var(--paint); color: var(--paint); font-weight: 600; text-align: center; }
+.node .pass { display: block; color: var(--warn); font-size: 0.68rem; }
+.node .reads { display: block; color: var(--ok); font-size: 0.68rem; }
+.d1 { margin-left: 16px; } .d2 { margin-left: 32px; }
+.wr { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.wr .card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.wr .card h4 { margin: 0; font-family: var(--mono); font-size: 0.95rem; color: var(--accent); }
+.note-box { border: 1.5px dashed var(--paint); border-radius: 10px; padding: 12px 16px; background: var(--paper); display: grid; gap: 4px; }
+.shared { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.shared .node.store { flex: 1 1 140px; }
+
+/* Show => and != as typed, not as joined symbols */
+code, pre { font-variant-ligatures: none; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="label">Flutter course · Session 5 of 15</span>
+  <h1>State Management <span>with</span> Riverpod</h1>
+  <p class="lede">With <code>setState</code>, data lives inside one screen, and every other widget that needs it has to receive it through constructors. Today you learn Riverpod, which keeps shared data in <b>providers</b> that any widget on any screen can read and update directly.</p>
+  <div class="goal">
+    <span class="label">By the end of today you can</span>
+    <p>Share state between screens with Riverpod, pick the right kind of provider, and keep your app's rules in a Notifier instead of inside widgets.</p>
+  </div>
+</header>
+
+<section>
+  <h2>Setup</h2>
+  <pre><code>flutter pub add flutter_riverpod</code></pre>
+  <p>This adds <code>flutter_riverpod: ^3.3.2</code> to <code>pubspec.yaml</code>. In VS Code, today's apps are in the <b>Session 5</b> group of the Run and Debug dropdown. From the terminal:</p>
+  <pre><code>flutter run -t lib/day5_demos/demo1_setstate_problem.dart
+flutter run -t lib/pizza_order/main.dart</code></pre>
+  <div class="note-box">
+    <span class="label">Riverpod 3 note</span>
+    <p><code>StateProvider</code> moved to a separate import in Riverpod 3. If you see “StateProvider isn't defined”, add <code>import 'package:flutter_riverpod/legacy.dart';</code>. Many older tutorials and AI answers miss this.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Riverpod words, in plain English</h2>
+  <p>Think of a classroom. With <code>setState</code>, the data is a note in one person's pocket: to reach anyone else, it has to be passed hand to hand. With Riverpod, the data is pinned on a <b>notice board on the wall</b>. Anyone can look at the board, and only the board's caretaker is allowed to change it.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Word</th><th>In the story</th><th>What it really is</th></tr>
+    <tr><td><code>ProviderScope</code></td><td>The school building that holds all the notice boards</td><td>Wraps your whole app, once, in <code>main()</code>. It stores the value of every provider. Without it the app crashes.</td></tr>
+    <tr><td><b>provider</b><br><code>cartProvider</code></td><td>One notice board, with a name</td><td>A piece of shared data, declared at the top of a file, outside every class, so any widget can find it by name.</td></tr>
+    <tr><td><code>ConsumerWidget</code></td><td>A student who can see the boards</td><td>A <code>StatelessWidget</code> that can use providers. Its <code>build</code> gets an extra <code>WidgetRef ref</code>.</td></tr>
+    <tr><td><code>ConsumerStatefulWidget</code></td><td>The same, for a student who also keeps their own notes</td><td>A <code>StatefulWidget</code> that can use providers. Use it when you also need <code>initState</code>/<code>dispose</code>, e.g. for a <code>TextEditingController</code>. Here <code>ref</code> is available everywhere in the State class.</td></tr>
+    <tr><td><code>ref</code></td><td>The student's eyes and hands for the boards</td><td>The object a widget uses to reach providers. No <code>ref</code>, no providers.</td></tr>
+    <tr><td><code>ref.watch(p)</code></td><td>Keep looking at the board, and update your notebook whenever it changes</td><td>Returns the value <b>and rebuilds this widget whenever it changes</b>. Use it inside <code>build()</code>. This is what replaces <code>setState</code>.</td></tr>
+    <tr><td><code>ref.read(p)</code></td><td>Walk up to the board once</td><td>Returns the value right now, without listening. Use it inside callbacks such as <code>onPressed</code>.</td></tr>
+    <tr><td><code>p.notifier</code></td><td>The board's caretaker</td><td>The object that can <b>change</b> the value. Without <code>.notifier</code> you get the value itself; with it you get the thing that changes it.</td></tr>
+    <tr><td><code>state</code></td><td>The sheet currently pinned on the board</td><td>The provider's current value. Assigning <code>state = …</code> pins up a new sheet, and every watcher rebuilds.</td></tr>
+    <tr><td><code>Notifier</code></td><td>A caretaker with a fixed list of jobs</td><td>A class you write with methods such as <code>add</code> and <code>remove</code>. They are the only way to change that provider.</td></tr>
+    <tr><td><code>build()</code> in a Notifier</td><td>What's on the board on the first day</td><td>Returns the starting value, e.g. an empty list. Runs once, like <code>initState</code>.</td></tr>
+  </table></div>
+
+  <h3>Reading one line of Riverpod</h3>
+  <pre><code>ref.read(cartProvider.notifier).add(name)</code></pre>
+  <div class="table-wrap"><table>
+    <tr><th>Part</th><th>Say it as</th></tr>
+    <tr><td><code>ref</code></td><td>“Using my access to the boards…”</td></tr>
+    <tr><td><code>.read(…)</code></td><td>“…walk up once (I'm in a button press, I don't need to keep watching)…”</td></tr>
+    <tr><td><code>cartProvider</code></td><td>“…to the cart board…”</td></tr>
+    <tr><td><code>.notifier</code></td><td>“…and talk to its caretaker…”</td></tr>
+    <tr><td><code>.add(name)</code></td><td>“…and ask it to add this product.”</td></tr>
+  </table></div>
+
+  <div class="note-box">
+    <span class="label">The two rules</span>
+    <p><b>1. <code>watch</code> to show, <code>read</code> to change.</b> In <code>build()</code>, always <code>ref.watch</code>. In <code>onPressed</code> and other callbacks, use <code>ref.read</code>. A widget rebuilds only if it <b>watches</b> something that changed.</p>
+    <p><b>2. Always give <code>state</code> a new value.</b> Write <code>state = [...state, item]</code>, never <code>state.add(item)</code>. Riverpod only notices a new list or a new object.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The concepts, in the order we cover them</h2>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo1</span><h3>Why setState breaks down</h3></div>
+    <p>In demo 1 the cart lives in <code>ShopScreen</code>'s State. Every widget that needs the cart, or needs to change it, must receive it through a constructor. This is called <b>prop drilling</b>. Some widgets take a parameter only to pass it on. Demo 5 builds the same shop with Riverpod.</p>
+    <div class="compare">
+      <div class="tree-diag" aria-label="setState version: data passed down through constructors">
+        <h4>demo 1 · setState</h4>
+        <div class="node holder">ShopScreen <span class="pass">holds the cart</span></div>
+        <div class="node d1">_CartButton <span class="pass">← count</span></div>
+        <div class="node d1">CartScreen <span class="pass">← cart, onRemove</span></div>
+        <div class="node d1">_ProductList <span class="pass">← onAdd (only passes it on)</span></div>
+        <div class="node d2">_ProductTile <span class="pass">← onAdd</span></div>
+      </div>
+      <div class="tree-diag" aria-label="Riverpod version: each widget reads the provider directly">
+        <h4>demo 5 · Riverpod</h4>
+        <div class="node store">cartProvider</div>
+        <div class="node">ShopScreen <span class="reads">holds nothing, builds once</span></div>
+        <div class="node d1">_CartButton <span class="reads">watches cartProvider</span></div>
+        <div class="node d1">CartScreen <span class="reads">watches cartProvider</span></div>
+        <div class="node d1">_ProductTile <span class="reads">reads cartProvider.notifier</span></div>
+      </div>
+    </div>
+    <p>Problems with the setState version:</p>
+    <ul class="points">
+      <li>Data and callbacks pass through widgets that don't use them.</li>
+      <li>When the cart screen changes the cart, both screens need extra <code>setState</code> calls to redraw.</li>
+      <li>The whole <code>ShopScreen</code> rebuilds for every change, even parts that didn't change.</li>
+    </ul>
+    <p>A rebuild takes about a millisecond, so you can't normally see it. In demos 1 and 5, every widget shows a grey <b>“built 1×”</b> tag that counts its rebuilds and flashes yellow each time. In demo 1, tap ➕ on one product and <b>all eight tags</b> go up.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo2</span><h3>Setup: ProviderScope, ConsumerWidget and Provider</h3></div>
+    <p>Nothing changes in demo 2. It shows <b>where</b> a shared value lives and <b>how</b> any widget reads it. Without Riverpod, you'd pass the app name down by hand:</p>
+    <pre><code><span class="c">// Without Riverpod: passed through every constructor</span>
+HomeScreen(appName: <span class="k">'Campus Store'</span>)
+  └─ _Footer(appName: appName)      <span class="c">// receives it again, and so on</span></code></pre>
+    <p>With Riverpod, nothing is passed. <code>_Footer()</code> reads the name itself. Using Riverpod takes three steps.</p>
+    <pre><code><span class="c">// 1. Declare a provider at the top level of a file.</span>
+<span class="k">final</span> appNameProvider = Provider&lt;String&gt;((ref) =&gt; <span class="k">'Campus Store'</span>);
+
+<span class="c">// 2. Wrap the app in ProviderScope. It stores every provider's value.</span>
+<span class="k">void</span> main() =&gt; runApp(<span class="k">const</span> ProviderScope(child: MyApp()));
+
+<span class="c">// 3. Read it in a ConsumerWidget through `ref`.</span>
+<span class="k">class</span> HomeScreen <span class="k">extends</span> ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    <span class="k">final</span> appName = ref.watch(appNameProvider);
+    <span class="k">return</span> Text(appName);
+  }
+}</code></pre>
+    <ul class="points">
+      <li><code>Provider</code> holds a value that doesn't change, or one calculated from other providers.</li>
+      <li><code>ConsumerWidget</code> is a <code>StatelessWidget</code> with a <code>ref</code>. <code>ConsumerStatefulWidget</code> is the same for a <code>StatefulWidget</code>.</li>
+      <li>If you forget <code>ProviderScope</code>, the app throws <code>Bad state: No ProviderScope found</code>.</li>
+    </ul>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo3</span><h3>StateProvider, and ref.watch vs ref.read</h3></div>
+    <p><code>StateProvider</code> holds one simple value that can change, like a counter or an on/off switch.</p>
+    <pre><code><span class="k">import</span> <span class="k">'package:flutter_riverpod/legacy.dart'</span>;
+
+<span class="k">final</span> counterProvider = StateProvider&lt;int&gt;((ref) =&gt; 0);
+
+<span class="c">// in build:</span>
+<span class="k">final</span> count = ref.watch(counterProvider);
+
+<span class="c">// in a button:</span>
+onPressed: () =&gt; ref.read(counterProvider.notifier).state++,</code></pre>
+    <div class="wr">
+      <div class="card">
+        <h4>ref.watch</h4>
+        <p>“Rebuild me whenever this value changes.”</p>
+        <p>Use it <b>inside <code>build()</code></b> for anything you display.</p>
+      </div>
+      <div class="card">
+        <h4>ref.read</h4>
+        <p>“Give me the value or notifier right now, once.”</p>
+        <p>Use it <b>inside callbacks</b> like <code>onPressed</code> to change state.</p>
+      </div>
+    </div>
+    <p>In the demo, replace <code>ref.watch</code> with <code>ref.read</code> on the commented line in <code>build</code>. The number stops updating on screen.</p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo4</span><h3>NotifierProvider for complex state</h3></div>
+    <p>When state has several operations, such as add, toggle and remove, put them in a <b>Notifier</b> class. Widgets call its methods, and all the rules live in one place.</p>
+    <pre><code><span class="k">class</span> TaskListNotifier <span class="k">extends</span> Notifier&lt;List&lt;Task&gt;&gt; {
+  @override
+  List&lt;Task&gt; build() =&gt; [];             <span class="c">// the starting state</span>
+
+  <span class="k">void</span> add(String title) {
+    state = [...state, Task(title: title)];   <span class="c">// a NEW list</span>
+  }
+
+  <span class="k">void</span> remove(int id) {
+    state = state.where((t) =&gt; t.id != id).toList();
+  }
+}
+
+<span class="k">final</span> taskListProvider =
+    NotifierProvider&lt;TaskListNotifier, List&lt;Task&gt;&gt;(TaskListNotifier.new);
+
+<span class="c">// in a widget:</span>
+<span class="k">final</span> tasks = ref.watch(taskListProvider);               <span class="c">// the list</span>
+ref.read(taskListProvider.notifier).add(<span class="k">'Revise Dart'</span>);    <span class="c">// call a method</span></code></pre>
+    <h3>State must be replaced, not changed</h3>
+    <p>Riverpod only notices a change when you <b>assign a new value</b> to <code>state</code>. Changing the old list in place does nothing on screen.</p>
+    <pre><code>state.add(task);                <span class="c">// ❌ same list, Riverpod sees no change</span>
+state = [...state, task];       <span class="c">// ✅ new list, widgets rebuild</span>
+
+task.isDone = <span class="k">true</span>;             <span class="c">// ❌ fields should be final</span>
+task.copyWith(isDone: <span class="k">true</span>)     <span class="c">// ✅ a new Task with one field changed</span></code></pre>
+    <h3>Derived providers</h3>
+    <p>Don't store a value you can calculate. A <code>Provider</code> that watches another provider recalculates automatically:</p>
+    <pre><code><span class="k">final</span> remainingCountProvider = Provider&lt;int&gt;((ref) {
+  <span class="k">return</span> ref.watch(taskListProvider).where((t) =&gt; !t.isDone).length;
+});</code></pre>
+  </div>
+
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo5</span><h3>Sharing state across screens</h3></div>
+    <p>Demo 5 is the shop from demo 1, rebuilt with a <code>cartProvider</code>. The two apps look and work the same; only the inside is different.</p>
+    <pre><code><span class="c">// The caretaker: the only way to change the cart</span>
+<span class="k">class</span> CartNotifier <span class="k">extends</span> Notifier&lt;List&lt;String&gt;&gt; {
+  @override
+  List&lt;String&gt; build() =&gt; <span class="k">const</span> [];                 <span class="c">// starts empty</span>
+  <span class="k">void</span> add(String item) =&gt; state = [...state, item];
+  <span class="k">void</span> remove(String item) =&gt; state = [...state]..remove(item);
+}
+<span class="k">final</span> cartProvider = NotifierProvider&lt;CartNotifier, List&lt;String&gt;&gt;(CartNotifier.new);
+
+<span class="c">// Product tile: CHANGES the cart, never watches it, so it never rebuilds</span>
+onPressed: () =&gt; ref.read(cartProvider.notifier).add(name),
+
+<span class="c">// Cart button: SHOWS the count, so it rebuilds when the cart changes</span>
+<span class="k">final</span> count = ref.watch(cartProvider).length;
+
+<span class="c">// Cart screen: shows the list AND removes items, with no callbacks passed in</span>
+<span class="k">final</span> cart = ref.watch(cartProvider);
+onPressed: () =&gt; ref.read(cartProvider.notifier).remove(item),</code></pre>
+    <ul class="points">
+      <li><code>ShopScreen</code> is a plain <code>StatelessWidget</code>. It holds nothing and passes nothing.</li>
+      <li>Remove an item on the cart screen and the badge on the shop screen updates by itself. There are no <code>setState</code> calls anywhere.</li>
+    </ul>
+    <p>Do the same taps in both demos and compare the “built” tags:</p>
+    <div class="table-wrap"><table>
+      <tr><th>Do this</th><th>Demo 1 · setState</th><th>Demo 5 · Riverpod</th></tr>
+      <tr><td>Add Pen</td><td>all 8 widgets → 2×</td><td>only the cart button → 2×</td></tr>
+      <tr><td>Add Backpack</td><td>all 8 widgets → 3×</td><td>only the cart button → 3×</td></tr>
+      <tr><td>Open the cart, delete Pen</td><td>cart screen → 2×</td><td>cart screen → 2×, cart button → 4×</td></tr>
+      <tr><td>Go back to the shop</td><td>all 8 widgets → 5×</td><td>title and tiles still 1×</td></tr>
+      <tr><td><code>setState</code> calls written by hand</td><td>4</td><td>0</td></tr>
+    </table></div>
+    <p>Only the widgets that <code>watch</code> the cart (the cart button and the cart screen) ever rebuild.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Which provider should I use?</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Provider</th><th>Use it for</th><th>Example</th></tr>
+    <tr><td><code>Provider</code></td><td>A value that never changes, or one calculated from other providers</td><td>App name, tax rate, menu items, cart total</td></tr>
+    <tr><td><code>StateProvider</code></td><td>One simple value changed from outside</td><td>Counter, dark mode on/off, home delivery switch</td></tr>
+    <tr><td><code>NotifierProvider</code></td><td>State with several operations and rules</td><td>Cart, task list, the pizza being built</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>The project: Pizza Order App</h2>
+  <p>On the first screen you pick a size, any toppings and a quantity. The button shows the live price, for example “Add 2 to order · ₹918”. The second screen lists everything in the order: change quantities, remove pizzas, switch on home delivery, and see the item count and total update as you go. A badge on the first screen's AppBar always shows how many pizzas are in the order.</p>
+
+  <div class="stage">
+    <div class="shared">
+      <div class="node">PizzaBuilderScreen<span class="reads">watches pizzaBuilderProvider<br>calls orderProvider.notifier.add()</span></div>
+      <div class="node store">orderProvider<br><span style="font-weight:400;font-size:.68rem">itemCount · subtotal · total</span></div>
+      <div class="node">OrderSummaryScreen<span class="reads">watches orderProvider, totalProvider<br>calls increment / decrement / remove</span></div>
+    </div>
+  </div>
+
+  <div class="stage tree">
+<div>lib/pizza_order/</div>
+<div>├─ <span class="hl">main.dart</span> <span class="note">· ProviderScope, named routes</span></div>
+<div>├─ <span class="hl">routes.dart</span> <span class="note">· class AppRoutes</span></div>
+<div>├─ models/<span class="hl">pizza.dart</span> <span class="note">· immutable classes with copyWith</span></div>
+<div>├─ providers/</div>
+<div>│&nbsp;&nbsp;├─ <span class="hl">menu_providers.dart</span> <span class="note">· sizes and toppings</span></div>
+<div>│&nbsp;&nbsp;├─ <span class="hl">pizza_builder_provider.dart</span> <span class="note">· the pizza being built</span></div>
+<div>│&nbsp;&nbsp;└─ <span class="hl">order_provider.dart</span> <span class="note">· the order and its totals</span></div>
+<div>├─ screens/ <span class="note">· pizza_builder_screen.dart, order_summary_screen.dart</span></div>
+<div>└─ widgets/ <span class="note">· order_button.dart, quantity_stepper.dart</span></div>
+  </div>
+
+  <h3>Where each concept appears</h3>
+  <div class="table-wrap"><table>
+    <tr><th>File</th><th>What to look for</th></tr>
+    <tr><td><code>menu_providers.dart</code></td><td>Plain <code>Provider</code>s for read-only menu data</td></tr>
+    <tr><td><code>pizza_builder_provider.dart</code></td><td>A <code>Notifier</code> with <code>selectSize</code>, <code>toggleTopping</code>, <code>increment</code> and <code>decrement</code>. <code>reset()</code> calls <code>ref.invalidateSelf()</code> to start over.</td></tr>
+    <tr><td><code>order_provider.dart</code></td><td>A <code>Notifier</code> for the order, a <code>StateProvider</code> for home delivery, and derived providers for item count, subtotal, delivery charge and total</td></tr>
+    <tr><td><code>pizza_builder_screen.dart</code></td><td><code>ref.watch</code> in <code>build</code>, <code>ref.read(...notifier)</code> in button callbacks</td></tr>
+    <tr><td><code>order_summary_screen.dart</code></td><td>Changing a quantity here updates the badge on the other screen, with no data passed between them</td></tr>
+    <tr><td><code>order_button.dart</code></td><td>A small <code>ConsumerWidget</code>, so only the badge rebuilds when the order changes</td></tr>
+  </table></div>
+
+  <h3>Testing the rules without any screens</h3>
+  <p>Because the rules live in providers, <code>test/pizza_order_test.dart</code> checks them with a <code>ProviderContainer</code> and no widgets at all:</p>
+  <pre><code><span class="k">final</span> container = ProviderContainer();
+container.read(orderProvider.notifier).add(draft);
+expect(container.read(itemCountProvider), 2);
+expect(container.read(subtotalProvider), 598);</code></pre>
+  <p>Run <code>flutter test</code> to see it pass.</p>
+</section>
+
+<section>
+  <h2>Errors you will see today</h2>
+  <div class="err">
+    <div class="err-item"><b>“Bad state: No ProviderScope found”</b><span>Wrap your app in <code>ProviderScope</code> inside <code>main()</code>.</span></div>
+    <div class="err-item"><b>StateProvider isn't defined</b><span>Riverpod 3 moved it. Add <code>import 'package:flutter_riverpod/legacy.dart';</code>.</span></div>
+    <div class="err-item"><b>The screen doesn't update after calling a notifier method</b><span>You changed the state in place (<code>state.add(...)</code>). Assign a new value: <code>state = [...state, item]</code>.</span></div>
+    <div class="err-item"><b>The screen never updates</b><span>You used <code>ref.read</code> inside <code>build</code>. Use <code>ref.watch</code> there.</span></div>
+    <div class="err-item"><b><code>ref.read(cartProvider).add(item)</code> runs but nothing changes</b><span>Without <code>.notifier</code> you get the list itself, and <code>add</code> changes it in place. Call the notifier's method: <code>ref.read(cartProvider.notifier).add(item)</code>.</span></div>
+    <div class="err-item"><b>“Undefined name 'ref'”</b><span>The widget still extends <code>StatelessWidget</code>. Change it to <code>ConsumerWidget</code> and add <code>WidgetRef ref</code> to <code>build</code>.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Practice task (in class)</h2>
+  <p>Build a <b>Counter + Cart</b> app with Riverpod.</p>
+  <ul class="checks">
+    <li><input type="checkbox" id="p1"><label for="p1">Screen 1 lists products, each with <b>Add</b> and <b>Remove</b> buttons.</label></li>
+    <li><input type="checkbox" id="p2"><label for="p2">Screen 2 shows the live item count and total price.</label></li>
+    <li><input type="checkbox" id="p3"><label for="p3">Screen 1's AppBar shows the item count as a badge.</label></li>
+    <li><input type="checkbox" id="p4"><label for="p4">The cart is a <code>NotifierProvider</code>. The count and total are derived <code>Provider</code>s.</label></li>
+    <li><input type="checkbox" id="p5"><label for="p5">No cart data is passed through any constructor.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Homework: extend the Pizza Order App</h2>
+  <ul class="checks">
+    <li><input type="checkbox" id="h1"><label for="h1">Add a “Veg only” switch (<code>StateProvider&lt;bool&gt;</code>) that hides Chicken from the toppings, using a derived <code>Provider</code>.</label></li>
+    <li><input type="checkbox" id="h2"><label for="h2">Add a coupon: <code>PIZZA50</code> gives ₹50 off orders over ₹500. Put the rule in a provider, not in a widget.</label></li>
+    <li><input type="checkbox" id="h3"><label for="h3">Make delivery free for orders over ₹999.</label></li>
+    <li><input type="checkbox" id="h4"><label for="h4">Write a unit test with <code>ProviderContainer</code> for your coupon rule.</label></li>
+    <li><input type="checkbox" id="h5"><label for="h5">Commit your work and push it to your GitHub repo.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Check yourself</h2>
+  <div class="qa">
+    <details><summary>What problem does Riverpod solve that setState doesn't?</summary><p>It shares state between widgets and screens without passing data and callbacks through constructors, and it rebuilds only the widgets that watch the changed value.</p></details>
+    <details><summary>When do you use ref.watch and when ref.read?</summary><p><code>ref.watch</code> inside <code>build()</code> for values you display. <code>ref.read</code> inside callbacks like <code>onPressed</code> to change state.</p></details>
+    <details><summary>Provider, StateProvider or NotifierProvider: when do you use each?</summary><p>Provider for read-only or calculated values. StateProvider for one simple value that changes. NotifierProvider for state with several operations and rules.</p></details>
+    <details><summary>Why does <code>state.add(item)</code> not update the UI?</summary><p>It changes the existing list, so <code>state</code> still points to the same object and Riverpod sees no change. Assign a new list instead.</p></details>
+    <details><summary>What does ProviderScope do?</summary><p>It stores the current value of every provider. Without it, no provider can be read.</p></details>
+  </div>
+</section>
+
+<section>
+  <span class="label">Next session</span>
+  <p><b>Session 6 · Working with APIs.</b> Fetching real data from the internet with the <code>http</code> package, turning JSON into Dart classes, and showing loading, empty and error states with <code>FutureProvider</code>. You'll build a Joke app.</p>
+</section>
+
+</div>
+
+</body>
+</html>

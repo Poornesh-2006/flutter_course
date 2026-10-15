@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Session 3 · Layouts &amp; Styling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single reading column styled like Flutter's Debug Paint, with dashed widget outlines and live CSS mini-layouts for every concept */
+:root {
+  --ground: #f5f8fa;
+  --paper: #ffffff;
+  --ink: #14212b;
+  --muted: #566672;
+  --line: #d3dde4;
+  --accent: #0a6fb8;
+  --accent-soft: #e2f0fa;
+  --paint: #11a3a3;          /* Debug Paint cyan for outlines */
+  --warn: #b5450b;
+  --warn-soft: #fbeee6;
+  --ok: #1f7a3d;
+  --code-bg: #eef3f6;
+  --box1: #e86a4a; --box2: #2f9e5f; --box3: #3478c6;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --s-1: 0.8125rem; --s0: 1rem; --s1: 1.25rem; --s2: 1.6rem; --s3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+    --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+    --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+    --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e161c; --paper: #15212a; --ink: #e3ebf0; --muted: #93a5b1;
+  --line: #2a3a46; --accent: #5cb4f0; --accent-soft: #15324a; --paint: #3fd0cf;
+  --warn: #f0965e; --warn-soft: #3a2316; --ok: #5fcf87; --code-bg: #0f1b23;
+  --box1: #e8805f; --box2: #4fb979; --box3: #5f9ce0;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: var(--s0); line-height: 1.65;
+  padding-inline: 20px; padding-block: 0 72px;
+}
+.wrap { max-width: 760px; margin-inline: auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: var(--s2); font-weight: 800; }
+h3 { font-size: var(--s1); font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre {
+  margin: 0; font-family: var(--mono); font-size: var(--s-1); line-height: 1.6;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; color: var(--ink);
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+.k { color: var(--accent); font-weight: 600; }
+.c { color: var(--muted); }
+.label {
+  font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--paint); font-weight: 600;
+}
+section { display: grid; gap: 18px; }
+
+/* Header */
+header { padding-block: 48px 0; display: grid; gap: 16px; }
+header h1 { font-size: clamp(2.2rem, 7vw, var(--s3)); font-weight: 800; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.goal {
+  border: 1.5px dashed var(--paint); border-radius: 10px; padding: 16px 18px;
+  background: var(--paper); display: grid; gap: 6px;
+}
+
+/* Concept blocks */
+.concept { border-top: 1px solid var(--line); padding-top: 28px; display: grid; gap: 14px; }
+.concept-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.demo-num {
+  font-family: var(--mono); font-size: var(--s-1); color: var(--paint);
+  border: 1.5px dashed var(--paint); border-radius: 6px; padding: 0 7px;
+}
+.run { font-family: var(--mono); font-size: var(--s-1); color: var(--muted); }
+.run b { color: var(--ink); font-weight: 600; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 65ch; }
+
+/* Mini layouts drawn like Debug Paint */
+.stage {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: grid; gap: 12px;
+}
+.stage-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.stage-row .cap { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.track {
+  outline: 1.5px dashed var(--paint); outline-offset: -1px; min-height: 56px;
+  display: flex; align-items: center; padding: 4px;
+}
+.b { width: 30px; flex: none; border-radius: 3px; }
+.b1 { background: var(--box1); height: 22px; }
+.b2 { background: var(--box2); height: 40px; }
+.b3 { background: var(--box3); height: 30px; }
+.box-label { color: #fff; font-family: var(--mono); font-size: 0.7rem; display: grid; place-items: center; height: 40px; border-radius: 3px; }
+
+.boxmodel { display: flex; gap: 16px; flex-wrap: wrap; }
+.bm { flex: 1 1 200px; display: grid; gap: 6px; }
+.bm-outer { outline: 1.5px dashed var(--muted); padding: 18px; position: relative; }
+.bm-box { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.bm-pad { padding: 18px; }
+.bm-child { background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 0.72rem; padding: 4px 8px; }
+
+.stack-demo { position: relative; height: 130px; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(135deg, var(--box1), var(--box3)); }
+.stack-demo .badge { position: absolute; top: 10px; left: 10px; background: var(--paper); color: var(--ink);
+  font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+.stack-demo .heart { position: absolute; bottom: 10px; right: 12px; color: #fff; font-size: 1.3rem; }
+.stack-demo .pos { position: absolute; font-family: var(--mono); font-size: 0.68rem; color: #fff; opacity: .85; }
+
+.grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid-demo div { height: 44px; border-radius: 6px; outline: 1.5px dashed var(--paint); outline-offset: -1px;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+.list-demo { display: grid; gap: 0; outline: 1.5px dashed var(--paint); outline-offset: -1px; max-height: 150px; overflow: hidden; position: relative; }
+.list-demo div { padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: var(--s-1); display: flex; justify-content: space-between; }
+.list-demo div span { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; }
+.list-demo::after { content: "rows 10 – 999 not built yet"; position: absolute; inset: auto 0 0 0; padding: 6px 12px;
+  background: linear-gradient(transparent, var(--paper) 55%); font-family: var(--mono); font-size: 0.7rem; color: var(--paint); text-align: right; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td code { white-space: nowrap; }
+
+/* File tree */
+.tree { font-family: var(--mono); font-size: var(--s-1); line-height: 1.8; }
+.tree .note { color: var(--muted); }
+.tree .hl { color: var(--accent); font-weight: 600; }
+
+/* Errors */
+.err { display: grid; gap: 10px; }
+.err-item { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; display: grid; gap: 4px; }
+.err-item b { font-family: var(--mono); font-size: var(--s-1); color: var(--warn); font-weight: 600; }
+
+/* Checklist */
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; }
+.checks input { margin-top: 5px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.checks label { cursor: pointer; }
+
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+details summary { cursor: pointer; font-weight: 500; }
+details p { margin-top: 8px; color: var(--muted); }
+.qa { display: grid; gap: 8px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .stage-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* Show => and != as typed, not as joined symbols */
+code, pre { font-variant-ligatures: none; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="label">Flutter course · Session 3 of 15</span>
+  <h1>Layouts <span>&amp;</span> Styling</h1>
+  <p class="lede">Last session you built a profile card with <code>Column</code>, <code>Row</code> and <code>Container</code>. Today you learn to place widgets anywhere on the screen, build lists that scroll, stack one widget on top of another, and style a whole app from one place.</p>
+  <div class="goal">
+    <span class="label">By the end of today you can</span>
+    <p>Build any static screen by combining Padding, Row, Column, Expanded, ListView, GridView and Stack, and take every color and font from a single <code>ThemeData</code>.</p>
+  </div>
+</header>
+
+<section>
+  <h2>How to use the project</h2>
+  <p>The project has one small demo file for each concept, plus the Restaurant Menu App that uses all of them together. Each demo is its own tiny app.</p>
+  <p><b>In VS Code:</b> open <b>Run and Debug</b> (<code>Cmd+Shift+D</code>, or <code>Ctrl+Shift+D</code> on Windows), pick an app from the dropdown under <b>Session 3</b>, and press <b>F5</b>. It runs in debug mode, so the Widget Inspector and breakpoints work.</p>
+  <p><b>From the terminal:</b> pass the demo's file with <code>-t</code>. Plain <code>flutter run</code> starts the Restaurant Menu App.</p>
+  <pre><code>flutter run -t lib/day3_demos/demo1_padding_alignment.dart</code></pre>
+  <p>While an app is running from the terminal, press <code>p</code> to turn on <b>Debug Paint</b>. It draws an outline around every widget, which is the fastest way to understand a layout. The diagrams on this page are drawn the same way.</p>
+</section>
+
+<section>
+  <h2>The concepts, in the order we cover them</h2>
+
+  <!-- 1 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo1</span><h3>Padding, margin, Alignment, Center</h3></div>
+    <p><b>Padding</b> is space inside a box, between its edge and its child. <b>Margin</b> is space outside a box, between it and its neighbours.</p>
+    <div class="stage">
+      <div class="boxmodel">
+        <div class="bm"><span class="run">padding: EdgeInsets.all(18)</span>
+          <div class="bm-box bm-pad"><div class="bm-child">child</div></div></div>
+        <div class="bm"><span class="run">margin: EdgeInsets.all(18)</span>
+          <div class="bm-outer"><div class="bm-box"><div class="bm-child">child</div></div></div></div>
+      </div>
+    </div>
+    <pre><code>Container(
+  margin: <span class="k">const</span> EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  padding: <span class="k">const</span> EdgeInsets.all(12),
+  alignment: Alignment.bottomRight, <span class="c">// where the child sits inside</span>
+  child: <span class="k">const</span> Text(<span class="k">'Hello'</span>),
+)</code></pre>
+    <ul class="points">
+      <li><code>EdgeInsets.all</code>, <code>.symmetric</code> and <code>.only</code> cover most cases.</li>
+      <li><code>Alignment(x, y)</code> runs from −1 to 1. <code>(-1, -1)</code> is top-left and <code>(0, 0)</code> is the centre.</li>
+      <li><code>Center</code> is a shortcut for <code>Align(alignment: Alignment.center)</code>.</li>
+    </ul>
+  </div>
+
+  <!-- 2 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo2</span><h3>MainAxisAlignment and CrossAxisAlignment</h3></div>
+    <p>Every Row and Column has two directions. The <b>main axis</b> is the direction the children are laid out in. The <b>cross axis</b> runs across it.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Widget</th><th>Main axis</th><th>Cross axis</th></tr>
+      <tr><td><code>Row</code></td><td>horizontal →</td><td>vertical ↓</td></tr>
+      <tr><td><code>Column</code></td><td>vertical ↓</td><td>horizontal →</td></tr>
+    </table></div>
+    <div class="stage" aria-label="Row with different mainAxisAlignment values">
+      <div class="stage-row"><span class="cap">start</span><div class="track" style="justify-content:flex-start;gap:4px"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i></div></div>
+      <div class="stage-row"><span class="cap">center</span><div class="track" style="justify-content:center;gap:4px"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i></div></div>
+      <div class="stage-row"><span class="cap">spaceBetween</span><div class="track" style="justify-content:space-between"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i></div></div>
+      <div class="stage-row"><span class="cap">spaceEvenly</span><div class="track" style="justify-content:space-evenly"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i></div></div>
+      <div class="stage-row"><span class="cap">cross: start</span><div class="track" style="align-items:flex-start;gap:4px"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i></div></div>
+      <div class="stage-row"><span class="cap">cross: end</span><div class="track" style="align-items:flex-end;gap:4px"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i></div></div>
+    </div>
+    <p>The demo shows every value side by side. Change one, hot reload, and watch the boxes move.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo3</span><h3>Expanded and Flexible</h3></div>
+    <p>A Row gives each child as much width as it asks for. When a long <code>Text</code> asks for more than the screen has, you get yellow-and-black overflow stripes. Wrapping it in <code>Expanded</code> tells it to use only the space that is left.</p>
+    <pre><code>Row(children: [
+  <span class="k">const</span> Icon(Icons.check_circle),
+  Expanded(            <span class="c">// takes all the leftover width</span>
+    child: Text(<span class="k">'A very long sentence that would overflow…'</span>),
+  ),
+])</code></pre>
+    <div class="stage">
+      <div class="stage-row"><span class="cap">flex 1 : 2 : 1</span>
+        <div class="track" style="gap:4px">
+          <div class="box-label" style="flex:1;background:var(--box1)">1</div>
+          <div class="box-label" style="flex:2;background:var(--box2)">2</div>
+          <div class="box-label" style="flex:1;background:var(--box3)">1</div>
+        </div></div>
+    </div>
+    <ul class="points">
+      <li><b>Expanded</b> must fill its share of the leftover space.</li>
+      <li><b>Flexible</b> may fill it, but can stay smaller if its child is small.</li>
+      <li><code>flex:</code> sets the ratio between siblings.</li>
+      <li>Both only work as a direct child of a Row, Column or Flex.</li>
+    </ul>
+  </div>
+
+  <!-- 4 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo4</span><h3>ListView and ListView.builder</h3></div>
+    <p>A Column does not scroll. Use a <code>ListView</code> when content can be taller than the screen.</p>
+    <div class="stage">
+      <div class="list-demo">
+        <div>Movie #1 <span>built</span></div><div>Movie #2 <span>built</span></div>
+        <div>Movie #3 <span>built</span></div><div>Movie #4 <span>built</span></div>
+        <div>Movie #5 <span>built</span></div>
+      </div>
+    </div>
+    <pre><code>ListView.builder(
+  itemCount: movies.length,          <span class="c">// 1000 items</span>
+  itemBuilder: (context, index) {
+    <span class="k">return</span> ListTile(title: Text(movies[index]));
+  },
+)</code></pre>
+    <ul class="points">
+      <li><code>ListView(children: [...])</code> builds every child at once. It's fine for a short, fixed list such as a settings page.</li>
+      <li><code>ListView.builder</code> builds only the rows that are on screen. Use it for long lists or lists that come from data. In the demo, watch the console: only about 10 of the 1000 rows are built.</li>
+      <li>A ListView inside a Column must be wrapped in <code>Expanded</code> (or a <code>SizedBox</code> with a height) so it knows how tall it can be.</li>
+    </ul>
+  </div>
+
+  <!-- 5 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo5</span><h3>GridView</h3></div>
+    <p>A GridView is a scrolling list laid out in columns.</p>
+    <div class="stage"><div class="grid-demo"><div>Pizza</div><div>Burger</div><div>Noodles</div><div>Dessert</div><div>Coffee</div><div>Seafood</div></div></div>
+    <pre><code>GridView.builder(
+  gridDelegate: <span class="k">const</span> SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 3,         <span class="c">// 3 columns</span>
+    mainAxisSpacing: 8,
+    crossAxisSpacing: 8,
+    childAspectRatio: 1.5,     <span class="c">// width ÷ height of each tile</span>
+  ),
+  itemCount: items.length,
+  itemBuilder: (context, index) =&gt; ...,
+)</code></pre>
+    <ul class="points">
+      <li><code>GridView.count</code> is the short form for a few fixed items.</li>
+      <li>Add <code>scrollDirection: Axis.horizontal</code> to scroll sideways. The category strip in the Restaurant app works this way.</li>
+    </ul>
+  </div>
+
+  <!-- 6 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo6</span><h3>Stack and Positioned</h3></div>
+    <p>Row and Column place children next to each other. <code>Stack</code> places them on top of each other. The first child is at the back, and each later child is drawn over it.</p>
+    <div class="stage">
+      <div class="stack-demo" role="img" aria-label="An image with a Bestseller badge in the top-left and a heart icon in the bottom-right">
+        <span class="badge">★ Bestseller</span>
+        <span class="pos" style="top:38px;left:12px">Positioned(top: 10, left: 10)</span>
+        <span class="heart">♥</span>
+        <span class="pos" style="bottom:42px;right:12px">Positioned(bottom: 10, right: 12)</span>
+      </div>
+    </div>
+    <pre><code>Stack(children: [
+  Image.asset(<span class="k">'assets/images/dish1.jpg'</span>),   <span class="c">// back layer</span>
+  Positioned(
+    top: 10, left: 10,
+    child: BestsellerBadge(),               <span class="c">// on top</span>
+  ),
+])</code></pre>
+    <p>Add <code>clipBehavior: Clip.none</code> to let a child hang outside the Stack, as in the notification dot on a cart icon in the demo.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="concept">
+    <div class="concept-head"><span class="demo-num">demo7</span><h3>ThemeData, assets and custom fonts</h3></div>
+    <p>Define colors and fonts once in <code>ThemeData</code>, then read them anywhere with <code>Theme.of(context)</code>. To restyle the whole app you change one file instead of hunting through every widget.</p>
+    <pre><code><span class="c">// main.dart: define once</span>
+MaterialApp(
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+    fontFamily: <span class="k">'Poppins'</span>,
+  ),
+)
+
+<span class="c">// any widget: read it</span>
+<span class="k">final</span> colors = Theme.of(context).colorScheme;
+Container(color: colors.primaryContainer)   <span class="c">// ✅ from the theme</span>
+Container(color: Color(0xFF009688))         <span class="c">// ❌ hardcoded</span></code></pre>
+    <p>Images and fonts have to be registered in <code>pubspec.yaml</code> before Flutter can find them:</p>
+    <pre><code>flutter:
+  assets:
+    - assets/images/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700</code></pre>
+    <ul class="points">
+      <li>YAML uses exactly 2 spaces per level. Tabs or wrong indentation break the file.</li>
+      <li>After editing <code>pubspec.yaml</code>, run <code>flutter pub get</code> and do a <b>full restart</b>. Hot reload does not load new assets.</li>
+      <li>The <code>family:</code> name in pubspec must match <code>fontFamily:</code> in ThemeData exactly.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The project: Restaurant Menu App</h2>
+  <p>A menu for a restaurant called “Spice Route”. A row of category tiles sits at the top, and a scrolling list of dish cards fills the rest of the screen. Each card has a photo, a veg or non-veg mark, the name, the price in ₹ and a short description. Popular dishes carry a “Bestseller” badge. Tapping a category filters the list.</p>
+
+  <div class="stage tree">
+<div>lib/</div>
+<div>├─ <span class="hl">main.dart</span> <span class="note">· starts the app and applies the theme</span></div>
+<div>├─ day3_demos/ <span class="note">· the 7 concept demos above</span></div>
+<div>└─ restaurant/</div>
+<div>&nbsp;&nbsp;&nbsp;├─ <span class="hl">theme.dart</span> <span class="note">· every color, font and card shape</span></div>
+<div>&nbsp;&nbsp;&nbsp;├─ models/<span class="hl">dish.dart</span> <span class="note">· the Dish class</span></div>
+<div>&nbsp;&nbsp;&nbsp;├─ data/<span class="hl">menu_data.dart</span> <span class="note">· categories and 8 dishes</span></div>
+<div>&nbsp;&nbsp;&nbsp;├─ widgets/<span class="hl">category_strip.dart</span></div>
+<div>&nbsp;&nbsp;&nbsp;├─ widgets/<span class="hl">dish_card.dart</span></div>
+<div>&nbsp;&nbsp;&nbsp;└─ screens/<span class="hl">menu_screen.dart</span></div>
+<div>assets/images/ <span class="note">· dish1.jpg … dish8.jpg</span></div>
+<div>assets/fonts/ <span class="note">· Poppins Regular and Bold</span></div>
+  </div>
+
+  <h3>Where each concept appears</h3>
+  <div class="table-wrap"><table>
+    <tr><th>File</th><th>What to look for</th></tr>
+    <tr><td><code>theme.dart</code></td><td><code>ColorScheme.fromSeed</code>, <code>fontFamily: 'Poppins'</code>, <code>cardTheme</code> for rounded cards, <code>appBarTheme</code></td></tr>
+    <tr><td><code>category_strip.dart</code></td><td>A horizontal <code>GridView.builder</code> with one row of tiles. Colors come from <code>Theme.of(context)</code>.</td></tr>
+    <tr><td><code>dish_card.dart</code></td><td><code>Stack</code> + <code>Positioned</code> for the Bestseller badge, <code>Expanded</code> so long names don't overflow, <code>Padding</code>, <code>Row</code> and <code>Column</code> for the text</td></tr>
+    <tr><td><code>menu_screen.dart</code></td><td>A <code>Column</code> holding the strip and a <code>ListView.builder</code> wrapped in <code>Expanded</code></td></tr>
+    <tr><td><code>pubspec.yaml</code></td><td>The <code>assets:</code> and <code>fonts:</code> sections</td></tr>
+  </table></div>
+  <p>Category tapping uses <code>setState</code>, which redraws the screen with the filtered list. We cover <code>setState</code> properly in Session 4. For now, just notice that it is there.</p>
+</section>
+
+<section>
+  <h2>Errors you will see today</h2>
+  <div class="err">
+    <div class="err-item"><b>Yellow-and-black stripes: “A RenderFlex overflowed by 42 pixels”</b><span>A child is too wide for its Row (or too tall for its Column). Wrap it in <code>Expanded</code>, or add <code>overflow: TextOverflow.ellipsis</code> to the Text.</span></div>
+    <div class="err-item"><b>“Vertical viewport was given unbounded height”</b><span>You put a ListView or GridView directly inside a Column. Wrap it in <code>Expanded</code>.</span></div>
+    <div class="err-item"><b>“Unable to load asset: assets/images/…”</b><span>The path has a typo, the folder isn't listed in pubspec.yaml, or you used hot reload instead of a full restart.</span></div>
+    <div class="err-item"><b>The font doesn't change</b><span>The <code>family:</code> in pubspec.yaml doesn't match <code>fontFamily:</code> in ThemeData, or you haven't restarted.</span></div>
+    <div class="err-item"><b>“Incorrect use of ParentDataWidget”</b><span>You used <code>Expanded</code> or <code>Positioned</code> outside a Row/Column or Stack.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Practice task (in class)</h2>
+  <p>Build a scrollable <b>Movies</b> screen with <code>ListView.builder</code>.</p>
+  <ul class="checks">
+    <li><input type="checkbox" id="p1"><label for="p1">Each card shows a poster image, the title, and a line with the year and rating.</label></li>
+    <li><input type="checkbox" id="p2"><label for="p2">A long title doesn't overflow. Use <code>Expanded</code> and <code>TextOverflow.ellipsis</code>.</label></li>
+    <li><input type="checkbox" id="p3"><label for="p3">No hardcoded colors. Every color comes from <code>Theme.of(context)</code>.</label></li>
+    <li><input type="checkbox" id="p4"><label for="p4">At least one image is a local asset registered in pubspec.yaml.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Homework: extend the Restaurant app</h2>
+  <ul class="checks">
+    <li><input type="checkbox" id="h1"><label for="h1">Add a “Spicy 🌶” badge in the top-right corner of spicy dishes with a second <code>Positioned</code>. Add an <code>isSpicy</code> field to <code>Dish</code>.</label></li>
+    <li><input type="checkbox" id="h2"><label for="h2">Add 4 more dishes with your own photos in <code>assets/images/</code>.</label></li>
+    <li><input type="checkbox" id="h3"><label for="h3">Give the app a completely different look by editing only <code>theme.dart</code>.</label></li>
+    <li><input type="checkbox" id="h4"><label for="h4">Show the number of dishes (“8 dishes”) below the category strip.</label></li>
+    <li><input type="checkbox" id="h5"><label for="h5">Commit your work and push it to your GitHub repo.</label></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Check yourself</h2>
+  <div class="qa">
+    <details><summary>What is the difference between Expanded and Flexible?</summary><p>Expanded forces its child to fill its share of the leftover space. Flexible lets the child be smaller than that share if it doesn't need all of it.</p></details>
+    <details><summary>Why use ListView.builder instead of ListView for 1000 items?</summary><p>ListView.builder only builds the rows that are visible, so it stays fast. A plain ListView builds all 1000 at once.</p></details>
+    <details><summary>In a Column, which direction does crossAxisAlignment control?</summary><p>Horizontal. A Column's main axis is vertical, so its cross axis is horizontal.</p></details>
+    <details><summary>In a Stack, which child is drawn on top?</summary><p>The last one. The first child is at the back.</p></details>
+    <details><summary>You added a new font file. What two steps make it work?</summary><p>Register it under <code>fonts:</code> in pubspec.yaml and run <code>flutter pub get</code>, then do a full restart of the app. Also set <code>fontFamily</code> in ThemeData to the same family name.</p></details>
+  </div>
+</section>
+
+<section>
+  <span class="label">Next session</span>
+  <p><b>Session 4 · Navigation &amp; Forms.</b> Moving between screens, passing data, <code>setState</code> in depth, and forms with validation. You'll build a Contact Book app.</p>
+</section>
+
+</div>
+
+</body>
+</html>
